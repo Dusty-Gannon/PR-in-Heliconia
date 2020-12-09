@@ -87,6 +87,10 @@ E.2
  
 * [ ] Addressed in lines ...
 
+**Thoughts**
+
+* This is simply not going to happen with the data we have.
+
 1.9 
 
  > The mean number of pollen tubes in this experiment is exceedingly small (0 to 1). One would think with hand pollination that one would get maximum pollen tube growth, but that doesn't happen, which makes Heliconias so interesting. I'd be interested to know whether the number of pollen tubes increases with the number of natural visits by hummingbirds (as well as pollen donors).
