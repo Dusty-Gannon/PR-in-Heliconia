@@ -1,53 +1,107 @@
+# Reviewer comments *American Naturalist* initial submission
 
-## Reviewer comments *American Naturalist* initial submission
+## Editor comments
 
-### Editor comments
-
-E.1 
+### E.1 
 
  > Is there literature on the pollinator efficiencies of visitors to these taxa? Or, more general information about whether pollinators with mismatched bill shapes are typically less efficient pollinators?
 
 * [ ] Addressed in lines ...
+
+**Notes**
+
+* *H. rostrata*
+
+  - Janecek et al. 2020, South Africa
   
-E.2
+    - Some visits from olive sunbird (*Cyanomitra olivacea*) and Camaroon sunbird (*Cyanomitra oritis*), but **no pollen tubes**. This documents poor pollinator efficiencies outside the native range. They do claim this could be morphological filtering.
+
+
+  
+### E.2
 
  > Which taxa are primary visitors of these *Heliconia* species in the wild?
 
 * [ ] Addressed in lines ...
-  
-### Reviewer 1 comments
 
-1.1
+**Notes**
+
+* *H. hirsuta*
+
+  - Snow and Snow (1972)
+
+    - green hermits and rufous-breasted hermits (*Glaucis hirsutus*)
+
+* *H. tortosa*
+
+  - Betts et al. (2015)
+
+    - *H. tortuosa* pollen is carried by six hummingbirds, indicating more than just hermits visit.
+
+  - Linhart 1973, La Selva
+    - Primarily Phaethorninae, but also forked-tail woodnymph (*Thalurania furcata*)
+
+  - Taylor and White (2007), Costa Rica
+
+    - Euglossine bees, sabrewings, and green hermits
+    
+* *H. rostrata*
+
+  - Janecek et al. 2020, South Africa
+  
+    - Some visits from olive sunbird (*Cyanomitra olivacea*) and Camaroon sunbird (*Cyanomitra oritis*) in Africa (not native range).
+
+  - Sazima et al. (1995), Brazil (not native range)
+
+    - Saw-billed hermit (*Ramphodon naevius*), which has a straight bill. 
+
+* *H. wagneriana*
+
+    - Stiles (1975), Costa Rica
+
+        - 49/51 (96.1%) of visits to *H. wagneriana* were by hermits (*Phaethornis superciliosus, Threnetes ruckeri,* and *Glaucis hirsuta*). 2 visits were by rufous-tails.
+
+    - Gannon et al. (2018)
+
+        - Mostly sabrewings, with a few green hermits
+
+    - Temeles and Bishop (2019)
+
+        - Mostly female purple-throated caribs, but males after the hurricane
+  
+## Reviewer 1 comments
+
+### 1.1
 
  > The finding that hand pollinations resulted in fewer pollen tubes than naturally outcrossed flowers exposed to hummingbird visits is not necessarily evidence of pollinator recognition. Rather, it indicates that something about hand pollination does not duplicate the natural pollination process, which beyond the hummingbird itself, could depend upon the timing of the pollinator visit in relation to the life of the flower, the number of hummingbird visits, or nectar removal.
 
 * [ ] Addressed in lines ...
   
-1.2
+### 1.2
 
  > Nectar removal seems the most likely explanation, and was the explanation offered by Betts et al. 2015. Yet in the current study, hand pollination plus nectar removing using a pipettor did not enhance pollen tube growth, thereby mimicking the results for natural hummingbird pollinators.  Possibly, bills or tongues be doing something mechanical inside the flower, such as pushing and relocating the staminode, or triggering something physiological in the nectar chamber. Alternatively, methods of this study may have differed from those in Betts et al., yet it is unclear how or why they would, given that removing nectar with a pipettor and hand-pollinating flowers are pretty straight forward methods. The inconsistent results call into question pollinator recognition and raise issues about methods and/or the genetics of the plants used in the experiments.
 
 * [ ] Addressed in lines ...
   
-  **Thoughts**
+  **Notes**
   
 * I would argue that these issues only call into question the *mechanism* of PR, considering that we used the same plants in the aviaries and found increased pollen tube rates following bird visits. It should therefore not call PR into question in general or raise issues about the methods/genetics.
 
-1.3  
+### 1.3  
 
  > To what extent might the low number of pollen tubes result from using experimental plants derived from the same genetic stock? Which species were ornamentals, which species were naturalized, and which species were native? Garden or naturalized plants might have low genetic diversity or may have been selected through the breeding process for low reproductive output. Did you check these plants to see whether they were in fact setting fruits and seeds?
 
 * [ ] Addressed in lines ...
   
-  **Thoughts**
+  **Notes**
   
 * *H. tortuosa* - Native
 
-  *H. rostrata* - Naturalized? (check with Carla)
+  *H. rostrata* - Ornamental. Native to western South America (Bernal et al. 2016).
   
-  *H. wagneriana* - Native?
+  *H. wagneriana* - Native. (Stiles 1975, 1979).
   
-  *H. hirsuta* - Ornamental
+  *H. hirsuta* - Native to Trinidad and South America (Snow and Snow, 1972; Bernal et al. 2016).
   
   *H. metallica* - Ornamental
   
@@ -117,21 +171,24 @@ E.2
 
 * I think we already cover why we don't have data on this, but we could add that they do remove at least some nectar which we can back up with the videos where one can clearly see the birds drinking.
 
-1.12 
+### 1.12 
 
  > ...while short-billed hummingbirds may be able to remove a small amount of nectar from the flowers of this plant in aviary experiments, they may not be major visitors to this plant in native systems due to competitive exclusion by long-billed hummingbird species that are more effective nectar removers. This has major implications for the pollinator recognition hypothesis as a pollinator filter, because it would suggest that competition with other hummingbird species is the filter, not within-the-tube pollinator recognition as implied by Betts et al. 2015.
 
 * [ ] Addressed in lines ...
 
-**Thoughts**
+**Notes**
+
+* See notes on E.2
 
 * Maybe Kara's camera data can be of some use, here with regards to *H. tortuosa*. 
 
 * Pollen data from Betts et al. (2015).
 
-* Literature for other species
+* Literature for other species 
 
-### Reviewer 2
+
+## Reviewer 2
 
 2.1 
 
@@ -210,8 +267,3 @@ E.2
 **Thoughts**
 
 * A side panel with flower and bill shapes...
-
-
-
-
-
