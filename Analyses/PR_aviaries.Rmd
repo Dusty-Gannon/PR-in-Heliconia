@@ -1,5 +1,5 @@
 ---
-title: "Appendix S3: Pollinator recognition as a mechanism of cryptic pollinator specialization by *Heliconia* - Aviary experiments"
+title: "Appendix S3: Testing for generality of pollinator recognition in *Heliconia*"
 author: "D.G. Gannon, A.S. Hadley, U.G. Kormann, F.A. Jones, M.G. Betts"
 header-includes:
   \usepackage{setspace}
@@ -8,14 +8,12 @@ bibliography: /Users/dusty/Documents/zotero_library.bib
 output: pdf_document
 ---
 
-\subsection{Preamble}
-```{r setup, include=FALSE}
+\subsection{R packages}
+```{r setup, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r packages, message=FALSE}
-
-    require(ggplot2)
+    require(tidyverse)
+    require(here)
     require(rstan)
     require(loo)
     require(gridExtra)
@@ -26,11 +24,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r functions, include=FALSE}
-
-    post.mode <- function(v){
-      q <- which.max(density(v)$y)
-      return(density(v)$x[q])
-    }
 
     hours <- function(x){
         substr(x, 1, nchar(x)-2)
@@ -46,7 +39,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r data}
 
-  av <- read.csv("~/Documents/Heliconia/Data/PR/aviaries_data.csv", header = T, as.is = T)
+  av <- read_csv(file = here("Data", "aviaries_data.csv"))
 
   av <- av[with(av, order(Species, Plant, Experiment)), ]
   
@@ -54,11 +47,19 @@ knitr::opts_chunk$set(echo = TRUE)
   av$f.species <- as.factor(av$Species)
   av$f.trtmnt <- factor(av$Treatment, levels = c("HP", "RTAH", "GREH"))
   
+# Summary table of experiments
+  
+  smry_table <- group_by(av, Species, Treatment) %>%
+    summarise(., n=n())
+  
 # Transform hand-pollination time into unit-
 #  scale measure of hours after midnight
-  av$hrs_postmidn <- scale(as.integer(hours(av$HP_time)) + as.numeric(minutes(av$HP_time))/60)
+  av$hrs_postmidn <- as.double(
+    scale(as.integer(hours(av$HP_time)) + 
+                             as.numeric(minutes(av$HP_time))/60)
+  )
   
-  X <- model.matrix(~ hrs_postmidn + f.species*f.trtmnt - 1, data = av)
+ 
 
 ```
 
