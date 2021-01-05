@@ -1,14 +1,18 @@
 ---
-title: "Appendix S3: Testing for generality of pollinator recognition in *Heliconia*"
+title: "Testing for generality of pollinator recognition in *Heliconia*: Analysis of aviary data"
 author: "D.G. Gannon, A.S. Hadley, U.G. Kormann, F.A. Jones, M.G. Betts"
 header-includes:
   \usepackage{setspace}
   \onehalfspacing
 bibliography: /Users/dusty/Documents/zotero_library.bib
-output: pdf_document
+output:
+  github_document:
+    pandoc_args: --webtex
 ---
 
-\subsection{R packages}
+### R packages
+
+
 ```{r setup, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -16,15 +20,8 @@ knitr::opts_chunk$set(echo = TRUE)
     require(here)
     require(rstan)
     require(loo)
-    require(gridExtra)
-    require(kableExtra)
 
-```
-
-
-
-```{r functions, include=FALSE}
-
+# User-defined functions
     hours <- function(x){
         substr(x, 1, nchar(x)-2)
     }
@@ -32,107 +29,130 @@ knitr::opts_chunk$set(echo = TRUE)
     minutes <- function(x){
       substr(x, nchar(x)-2+1, nchar(x))
     }
+    
+# function to get means on pollen tube scale
+   pt_mean <- function(v, h){
+     exp(h%*%v)
+   }
 
 ```
 
-\subsubsection{Data processing}
+### Load data
 
 ```{r data}
 
+# Load data
   av <- read_csv(file = here("Data", "aviaries_data.csv"))
 
+# Sort rows by species, then plant individual ID, then experiment ID
   av <- av[with(av, order(Species, Plant, Experiment)), ]
   
-
+# Create factors for species, treatment, and plant individual
   av$f.species <- as.factor(av$Species)
-  av$f.trtmnt <- factor(av$Treatment, levels = c("HP", "RTAH", "GREH"))
+  av$Treatment2 <- av$Treatment
+  av$Treatment2[av$Treatment2 == "RTAH"] <- "SB"
+  av$Treatment2[av$Treatment2 == "GREH"] <- "LB"
   
-# Summary table of experiments
+  av$f.trtmnt <- factor(av$Treatment2, levels = c("HP", "SB", "LB"))
+  av$f.plant <- factor(av$Plant)
   
-  smry_table <- group_by(av, Species, Treatment) %>%
-    summarise(., n=n())
-  
-# Transform hand-pollination time into unit-
-#  scale measure of hours after midnight
-  av$hrs_postmidn <- as.double(
-    scale(as.integer(hours(av$HP_time)) + 
-                             as.numeric(minutes(av$HP_time))/60)
-  )
-  
- 
-
 ```
 
-\subsection{Summary}
 
-  To analyze data from aviary experiments, we consider 4 regression models and compare their fit using Pareto-smoothed importance sampling for leave-one-out cross validation (PSIS-LOO; @vehtari2017; see Appendix S2 for more details). In each model, we include a control variable for the time of day at which an experiment took place, as environmental factors that covary with the time of day (e.g. heat, relative humidity) can affect stigmatic receptivity [@dafni2000] and pollen viability [@hedhly2003].
-  
-  
-\subsection{Model 1}
+## Summary
 
-  We assume the number of pollen tubes observed in a style $y_1, y_2, ..., y_N$ are draws from Poisson distributions with rate parameters $\lambda_i;\ i=1,2,...,N$. Further,
+To test whether pollen germination and tube growth is dependent on the identity and morphology of a floral visitor, we conducted pollination experiments with captive hummingbirds inside portable aviaries. In these experiments, we randomly assigned flowers to one of three experimental treatments: 1) hand-pollination only (HP treatment); 2) hand pollination followed by a visit from a pollen-free rufous-tailed hummingbird (SB treatment); 3) hand pollination followed by a visit from a pollen-free long-billed hummingbird (LB treatment).
+
+In all experiments, we used only virgin flowers that had been covered with mesh bags prior to anthesis in order to preclude pollination by free-ranging pollinators. Flowers were not emasculated, however, due to extremely low numbers of pollen tubes in emasculated flowers in natural settings (A. S. Hadley, unpublished data).  Using small, portable  aviaries (1m x 1m x 2m; Figure S1) that we erected around live inflorescences, we standardized the number of pollinator visits to the flowers that were visited by birds (limited to one). Additionally, we standardized the quality of pollen available to flowers that received the control treatment (HP; no interaction with a hummingbird) and those visited by a hummingbird. We did this by hand pollinating two virgin flowers using pollen from the same donor, then randomly assigning one as a control which we covered with a paper sleeve during the experiment. The other was left open to a visit from a captive hummingbird (LB or SB) that we cleaned under 20x magnification prior to releasing into the aviary. We further attempted to reduce variation in the quantity of pollen available to the flowers by applying pollen in an even layer across the stigmatic surface with a toothpick under 20x magnification. The size of Heliconia pollen grains makes it impractical to quantify the number of grains on the stigma in the field, but all hand pollinations were conducted by the same experimenter to limit variability. After the hummingbird visited the treatment flower, we checked the stigma again to ensure that pollen was still present and in an even layer on the stigmatic surface. 
+
+
+\subsection{Model}
+
+  We assume that pollen tube counts, $y_{i} \in \mathbb{R}^+$, $i=1,2,...,N$, are draws from Poisson distributions with rate parameters $\lambda_{i}$. We model the rate parameter as
   
 $$
-\log \vec \lambda = {\bf X}\vec \beta,
+\begin{split}
+\log \lambda_{i} = {\bf X}_{i}{\bm \beta} + \gamma_{p(s)}^{(i)};\\
+\\
+\gamma_{1,s}, \gamma_{2,s},...,\gamma_{P_s,s} \overset{iid}{\sim} \mathcal{N}(0, \sigma_s^2)
+\end{split}
 $$
-where $\vec \lambda$ is the vector of rate parameters, which has rank $N$ and depends on the vector of regression parameters $\vec \beta$. The model matrix $\bf X$ contains the measured covariates which are binary for the species and treatment factors, and scaled values for the time of day at which a given flower was hand-pollinated (see Appendix S1 for experimental methods). We place independent, weakly informative priors on the regression parameters such that
 
-$$ \vec \beta \sim \text{Multi-Normal}({\bf 0},\ 1.5 I), $$
-where $I$ is the identity matrix and $\sigma = 1.5$ is the standard deviation (see Appendix S2 for prior justification). 
+where $P_s$ is the total number of plants of species $s$ used in experiments, $S$ is the number of species tested, and ${\bf X}_{i}$ is the $i^{\text{th}}$ row of the model matrix $\bf X$. We use the subscript $p(s)$ to indicated that the effect of plant $p$ is nested within species $s$, and superscript $(i)$ to be clear that the $i^\text{th}$ style came from plant $p$ of species $s$. In these experiments, we had 3 treatments (hand pollination only, hand pollination followed by a visit from a clean, short-billed hummingbird, and hand pollination followed by a visit from a long-billed hummingbird), and $S=4$ plant species. Thus, $\bf X$ is rank $K=S\times P$.
 
-$~$
-
-\subsubsection{Stan model code: Model 1}
+We placed weakly informative priors on the elements of the $K$-dimensional regression parameter vector $\bm \beta$, assuming ${\bm \beta}_K \sim \mathcal{N}({\bf 0},\ 1.5\cdot {\bf I}_K)$, where ${\bf I}_K$ is the rank $K$ identity matrix, and the species-specific scale parameters such that $\sigma_s \sim \text{half-Normal}(0,1)$ for each $s \in \{1,2,...,S\}$. This structure allows us to account for repeated experiments on individual plants without assuming all plant effects are i.i.d. random variables, but instead that plant effects are i.i.d. within a species.
 
 
-```{stan output.var="poisson_reg", eval=FALSE}
+```{stan output.var="poisson_model", eval=FALSE}
 
   data{
-  
-    int N;              // number of observations
-    int K;              // number of regression parameters in design matrix
-    
-    int y[N];           // observations
-    matrix[N,K] X;      // design matrix
+   
+    int N;         //number of observations
+    int K;         //number of regressions parameters
+    int P;         //number of unique plants sampled (i.e. number of intercepts)
+    int S;         //number of species in the analysis
+    int pl[N];  //index for the plant in experiment i
+    int sp[N];     //index for the plant species in experiment i
+    int<lower=0> y[N];  //observations
+    matrix[N,K] X;      //design matrix
+    //real mu_prior;      // prior mean for grand mean
   
   }
-  
   
   parameters{
   
-    vector[K] beta;     //regression parameters
-    
-  }
+    vector[K] beta;            //vector of regression parameters
+    real gamma_raw[P];         //individual plant effects before scaling
+    real<lower=0> sigma[S];    //sd of plant effects, unique across species
   
+  }
   
   transformed parameters{
   
-    real<lower=0> lambda[N];     
-    
+    real<lower=0> lambda[N];  //rate parameter for the nth obs.
+
     for(n in 1:N){
-      lambda[n] = exp(X[n,]*beta);
+      lambda[n] = exp(X[n,]*beta + gamma_raw[pl[n]]*sigma[sp[n]]);
     }
-  }
   
+  }
   
   model{
   
-  //priors
-    beta ~ normal(0,1.5);
+    //priors
+    //beta[1] ~ normal(mu_prior, 0.5);
+    for(k in 1:K){
+      beta[k] ~ normal(0,1.5);
+    }
     
-    y ~ poisson(lambda);
-  
+    for(s in 1:S){
+      sigma[s] ~ normal(0,1);
+    }
+    
+    for(p in 1:P){
+      gamma_raw[p] ~ normal(0,1);
+    }
+    
+    //model
+    for(n in 1:N){
+      y[n] ~ poisson(lambda[n]);
+    }
+    
   }
-  
-  
+
   generated quantities{
   
     vector[N] loglik;
+    int y_rep[N];
     
     for(n in 1:N){
       loglik[n] = poisson_lpmf(y[n] | lambda[n]);
+      y_rep[n] = poisson_rng(lambda[n]);
     }
+  
   }
+  
+
 ```
   
   
@@ -143,679 +163,39 @@ $~$
   N <- dim(av)[1]
   y <- av$Tube_Count
   
-  X <- model.matrix(~hrs_postmidn + f.species*f.trtmnt -1, data = av)
+  X <- model.matrix(~f.species*f.trtmnt -1,
+                    data = av)
   K <- dim(X)[2]
+  pl <- as.integer(as.factor(av$Plant))
+  sp <- as.integer(av$f.species)
+  S <- length(unique(sp))
+  P <- length(unique(pl))
   
-  m1.data <- list(N=N, y=y, X=X, K=K)
   
-  m1 <- sampling(poisson_reg, data=m1.data)  
+  mod.data <- list(N=N, K=K, S=S, P=P,
+                   sp=sp, pl=pl,
+                   y=y, X=X)
+                  #mu_prior=log(grand_mean))
+  
+  mfit <- sampling(poisson_model, data=mod.data)  
   
 # looic and other model assessments
   
-  m1_loglik <- extract_log_lik(m1, "loglik", merge_chains = FALSE)
+  loglik <- extract_log_lik(mfit, "loglik", merge_chains = FALSE)
   
-  m1_reff <- relative_eff(exp(m1_loglik))
+  reff <- relative_eff(exp(loglik))
   
-  m1_loo <- loo(m1_loglik, r_eff = m1_reff)
+  mfit_loo <- loo(loglik, r_eff = reff)
 
-
+# save the model fit
+  saveRDS(mfit, file = here("Data", "av_model_fit.rds"))
+  
 ```
 
 $~$
 
 ************
-
-\subsection{Model 2}
-
-  In model 2, we consider adding effects for plants within species to account for repeated measures on individual plants. Thus, $y_i \sim \text{Poisson}(\lambda_i);\ i=1,2,...,N$, and
-  
-$$
-\begin{split}
-\log \lambda_{i,p,s} = {\bf x}_{i*}\vec \beta + \gamma_{p,s};\ p=1,2,...,P_s;\ s=1,2,...,S\\
-\\
-\gamma_{p,s} \sim \text{Normal}(0, \sigma_s^2);\ s=1,2,...,S,
-\end{split}
-$$
-where $P_s$ is the total number of plants of species $s$ used in experiments, $S$ is the number of species tested, and ${\bf x}_{i*}$ is the $i^{\text{th}}$ row of the model matrix $\bf X$. We placed weakly informative priors on the species-specific scale parameters such that $\sigma_s \sim \text{half-Cauchy}(0,2)$ for each $s \in \{1,2,...,S\}$. This structure allows us to account for repeated experiments on individual plants without assuming all plant effects are i.i.d. random variables, but instead that plant effects are i.i.d. within a species.
-  
-  
-  
-\subsubsection{Stan model code: Model 2}
-
-
-```{stan output.var="poisson_regVaryInts_pl", eval=FALSE}
-
-  data{
-  
-    int N;         //number of observations
-    int K;         //number of regressions parameters
-    int P;         //number of unique plants sampled (i.e. number of intercepts)
-    int S;         //number of species in the analysis
-    
-    int pl[N];  //index for the plant in experiment i
-    int sp[N];     //index for the plant species in experiment i
-    
-    int<lower=0> y[N];  //observations
-    matrix[N,K] X;      //design matrix
-  
-  }
-  
-  
-  parameters{
-  
-    vector[K] beta;            //vector of regression parameters
-    real gamma_raw[P];         //individual plant effects before scaling
-    real<lower=0> sigma[S];    //sd of plant effects, unique across species
-  
-  }
-  
-  
-  transformed parameters{
-  
-    real<lower=0> lambda[N];
-
-    for(n in 1:N){
-      lambda[n] = exp(X[n,]*beta + gamma_raw[pl[n]]*sigma[sp[n]]);
-    }
-  
-  }
-  
-  
-  model{
-  
-    //priors
-    beta ~ normal(0,1.5);
-    
-    for(s in 1:S){
-      sigma[s] ~ cauchy(0,2);
-    }
-    
-    //model
-    
-    for(p in 1:P){
-      gamma_raw[p] ~ normal(0,1);
-    }
-    
-    for(n in 1:N){
-      y[n] ~ poisson(lambda[n]);
-    }
-    
-  }
-
-
-  generated quantities{
-  
-    vector[N] loglik;
-    int y_rep[N];
-    
-    for(n in 1:N){
-      loglik[n] = poisson_lpmf(y[n] | lambda[n]);
-      y_rep[n] = poisson_rng(lambda[n]);
-    }
-  
-  
-  }
-
-
-```
-  
-
-```{r run model 2, echo=FALSE, eval=FALSE}
-
-  N <- dim(av)[1]
-  P <- length(unique(av$Plant))
-  S <- length(unique(av$Species))
-  
-  
-  y <- av$Tube_Count
-  X <- model.matrix(~hrs_postmidn + f.species*f.trtmnt -1, data = av)
-  
-  K <- dim(X)[2]
-  
-  plant <- as.integer(factor(av$Plant, levels = unique(av$Plant)))
-  sp <- as.integer(factor(av$Species, levels = unique(av$Species)))
-  
-  m2.data <- list(N=N, K=K, P=P, S=S, y=y, X=X, pl=plant, sp=sp)
-  
-  m2 <- sampling(poisson_regVaryInts_pl, data=m2.data, chains=2, control=list(adapt_delta=0.9))
-  
-  
-# looic and other model assessments
-  
-  m2_loglik <- extract_log_lik(m2, "loglik", merge_chains = FALSE)
-  
-  m2_reff <- relative_eff(exp(m2_loglik))
-  
-  m2_loo <- loo(m2_loglik, r_eff = m2_reff)
-
-
-```
-
-***********
-$~$
-
-\subsection{Model 3}
-
-  Model 3 is identical to Model 2, except that we allow intercepts to vary given the day on which we conducted experiments. Again, we do not allow information to be shared across species, so day level effects are distributed normally with a species-specific variance.
-  
-Assuming $y_{i,d,s} \sim \text{Poisson}(\lambda_{i,d,s});\ i=1,2,...,N;\ d=1,2,...,D_s;\ s=1,2,...,S$,
-
-$$
-\begin{split}
- \log \lambda_{i,d,s} = {\bf x}_{i*} \vec \beta + \delta_{d,s};\ d=1,2,...,D_s;\ s=1,2,...,S \\
- \\
- \delta_{d,s} \sim \text{Normal}(0,\ \omega_s^2);\ s=1,2,...,S\\
- \\
-\end{split}
-$$
-where $\delta_{d,s}$ is the effect of the day on species $s$, $D_s$ is the number of days over which experiments were conducted on species $s$, $S$ is the number of plant species in the experiments, with all else defined as above. We place $\text{half-Cauchy}(0,2)$ priors on the species-specific scale parameters $\omega_s$, as described above.
-
-\subsubsection{Stan model code: Model 3}
-
-```{stan output.var="poisson_regVarInts_day", eval=FALSE}
-
-  data{
-  
-    int N;         //number of observations
-    int K;         //number of regressions parameters
-    int D;         //number of unique days sampled (i.e. number of intercepts)
-    int S;         //number of species in the analysis
-    
-    int day[N];  //index for the plant in experiment i
-    int sp[N];     //index for the plant species in experiment i
-    
-    int<lower=0> y[N];  //observations
-    matrix[N,K] X;      //design matrix
-  
-  }
-  
-  
-  parameters{
-  
-    vector[K] beta;            //vector of regression parameters
-    real delta_raw[D];         //individual day effects
-    real<lower=0> omega[S];    //sd of day effects, unique across species
-  
-  }
-  
-  
-  transformed parameters{
-  
-    real<lower=0> lambda[N];
-
-    for(n in 1:N){
-      lambda[n] = exp(X[n,]*beta + delta_raw[day[n]]*omega[sp[n]]);
-    }
-  
-  }
-  
-  
-  model{
-  
-    //priors
-    beta ~ normal(0,1.5);
-    
-    for(s in 1:S){
-      omega[s] ~ cauchy(0,2);
-    }
-    
-    //model
-    
-    for(d in 1:D){
-      delta_raw[d] ~ normal(0,1);
-    }
-    
-    for(n in 1:N){
-      y[n] ~ poisson(lambda[n]);
-    }
-    
-  }
-
-
-  generated quantities{
-  
-    vector[N] loglik;
-    int y_rep[N];
-    
-    for(n in 1:N){
-      loglik[n] = poisson_lpmf(y[n] | lambda[n]);
-      y_rep[n] = poisson_rng(lambda[n]);
-    }
-  
-  
-  }
-
-```
-
-```{r run model m3, echo=FALSE, eval=FALSE}
-
-  X <- model.matrix(~hrs_postmidn + f.species*f.trtmnt - 1, data = av)
-  N <- dim(X)[1]
-  K <- dim(X)[2]
-  D <- length(unique(av$Date))
-  S <- length(unique(av$Species))
-  
-  day <- as.integer(factor(as.character(av$Date)))
-  sp <- as.integer(factor(av$Species))
-  y <- av$Tube_Count
  
-  m3.data <- list(X=X, N=N, K=K, D=D, S=S, day=day, sp=sp, y=y)
-  
-  m3 <- sampling(poisson_regVarInts_day, data=m3.data, control=list(adapt_delta=0.9), cores=2)
-  
-# model evaluation using loo
-  
-  m3.loglik <- extract_log_lik(m3, parameter_name = "loglik", merge_chains = FALSE)
-  m3.reff <- relative_eff(exp(m3.loglik))
-  
-  m3.loo <- loo(m3.loglik, r_eff = m3.reff)
-
-
-```
-************
-$~$
-
-\subsection{Model 4}
-
-  Because we used the same bird as a treatment across multiple experiments, we additionally consider a model with varying slopes for the bird. This is a 'varying slopes' model because the reference treatment is hand-pollination which was consistently conducted by author D.G.G. Thus, the intercept should not vary, but rather the treatment effect given the bird. For example,
-
-$$
-\begin{aligned}
-\log \lambda_{i,b} &= \beta_0 + x_{i,1}(\beta_1 + u_b)\\
-\\
-&= \beta_0 + x_{i,1}\beta_1 + x_{i,1}u_b,
-\end{aligned}
-$$
-where $u_b$ is the adjustment to the treatment effect due to bird $b$. We formulate Model 4 as follows: $y_{i,b,h} \sim \text{Poisson}(\lambda_{i,b,h});\ b=1,2,...,B_h$, where $B_h$ is the number of birds of species $h$ used in aviary experiments, and
-
-$$
-\begin{split}
-\log \lambda_{i,b,h} = {\bf x}_{i*} \vec \beta + z_{i}u_{b,h}\\
-\\
-u_{b,h} \sim \text{Normal}(0,\ \tau_h^2), \\ 
-\\
-\end{split}
-$$
-where $z_{i}$ is a binary covariate indicating whether flower $i$ was visited by a bird, and $h$ indexes the bird species (rufous tailed hummingbird or green hermit hummingbird). We place weakly informative priors on all regression coefficients (see Appendix S2 for details) and the scale parameters $\tau_h$ are specific to hummingbird species.
-
-\subsubsection{Stan model code: Model 4}
-
-```{stan output.var="poisson_regVarSlps_bird", eval=FALSE}
-
-  data{
-  
-    int N;         //number of observations
-    int K;         //number of regressions parameters
-    int B;         //number of birds in experiments
-    int S;         //number of bird species in the experiments
-    
-    int bird[N];     //index for the bird
-    int sp[N];       //index for the bird species
-
-    int<lower=0> y[N];  //observations
-    matrix[N,K] X;      //design matrix
-    vector[N] z;        //covariate indicating bird visit
-  
-  }
-  
-  
-  parameters{
-  
-    vector[K] beta;             //vector of regression parameters
-    real u_raw[B];              //bird effects unscaled
-    real<lower=0> tau[S];      //sd of bird effects, unique across species
-  
-  }
-  
-  
-  transformed parameters{
-  
-    real<lower=0> lambda[N];
-
-    for(n in 1:N){
-      lambda[n] = exp(X[n,]*beta + z[n]*u_raw[bird[n]]*tau[sp[n]]);
-    }
-  
-  }
-  
-  
-  model{
-  
-    //priors
-    beta ~ normal(0,1.5);
-    
-    for(s in 1:S){
-      tau[s] ~ cauchy(0,2);
-    }
-    
-    //model
-    
-    for(b in 1:B){
-      u_raw[b] ~ normal(0,1);
-    }
-    
-    for(n in 1:N){
-      y[n] ~ poisson(lambda[n]);
-    }
-    
-  }
-
-
-  generated quantities{
-  
-    vector[N] loglik;
-    int y_rep[N];
-    
-    for(n in 1:N){
-      loglik[n] = poisson_lpmf(y[n] | lambda[n]);
-      y_rep[n] = poisson_rng(lambda[n]);
-    }
-  
-  
-  }
-
-```
-
-```{r run m4, echo=FALSE, eval=FALSE}
-
-  X <- model.matrix(~hrs_postmidn + f.species*f.trtmnt - 1, data = av)
-  N <- dim(X)[1]
-  K <- dim(X)[2]
-  
-     av$bird2 <- av$Bird
-     av$bird2[is.na(av$bird2)] <- "DG"
-  B <- length(unique(av$Bird))
-  S <- length(unique(av$Treatment))
-  
-  bird <- as.integer(factor(av$bird2))
-  sp <- as.integer(factor(av$Treatment, levels = c("HP","GREH", "RTAH")))
-  
-  z <- av$Treatment
-    z[z!= "HP"] <- 1
-    z[z=="HP"] <- 0
-    z <- as.numeric(z)
-  
-  y <- av$Tube_Count
- 
-  m4.data <- list(X=X, N=N, K=K, B=B, S=S, bird=bird, sp=sp, z=z, y=y)
-  
-  m4 <- sampling(poisson_regVarSlps_bird, data=m4.data, control=list(adapt_delta=0.99), cores=2)
-  
-# model evaluation using loo
-  
-  m4.loglik <- extract_log_lik(m4, parameter_name = "loglik", merge_chains = FALSE)
-  m4.reff <- relative_eff(exp(m4.loglik))
-  
-  m4.loo <- loo(m4.loglik, r_eff = m4.reff)
-
-```
-```{r echo=FALSE, eval=FALSE}
-save(m1, m1_loo, m2, m2_loo, m3, m3.loo, m4, m4.loo, file = "~/Documents/Heliconia/Analyses/PR/PR_aviaries/av_model_fits.RData")
-```
-
-***********
-
-$~$
-\subsection{Model Comparisons}
-
-**Table 1**: Comparisons of the four models described above using PSIS-LOO [@vehtari2017]. Descriptions of column names are as follows: $\Delta\widehat{\text{ELPD}}_{\text{loo}}$ is the difference between the estimate for the expected-log-pointwise predictive density $\widehat{\text{ELPD}}_\text{loo}$ of the top-ranked model and the model in row $i$; $\text{se}_{\Delta}$ is the standard error of the estimated difference in column 1; $\widehat{\text{ELPD}}_\text{loo}$ is the expected pointwise predictive density for the model; $\hat p_{\text{loo}}$ is the approximate number of parameters being estimated, with standard error $\text{se}_{\hat p}$; and LOOIC is the leave-one-out information criterion, for which smaller values indicate 'better' models, similar to other information criteria (e.g. AIC; @vehtari2017).
-
-```{r comparisons, echo=FALSE}
-load("~/Documents/Heliconia/Analyses/PR/PR_aviaries/av_model_fits.RData")
-
-  comps <- as.data.frame(compare(m1_loo, m2_loo, m3.loo, m4.loo))
-  
-  cnames1 <- c("$\\Delta\\widehat{\\text{ELPD}}_{\\text{loo}}$",
-               "$\\text{se}_{\\Delta}$",
-               "$\\widehat{\\text{ELPD}}_{\\text{loo}}$",
-               "$\\text{se}_{\\widehat{\\text{ELPD}}}$",
-               "$\\hat{p}_{\\text{loo}}$",
-               "$\\text{se}_{\\hat{p}}$",
-               "LOOIC",
-               "$\\text{se}_{\\text{LOOIC}}$")
-  row.names(comps) <- c("Model 3", "Model 2", "Model 4", "Model 1")
-  
-  kable(comps, format = "latex", col.names = cnames1, escape = F, digits = 3, booktabs=T, align = "c")
-```
-$~$  
-$~$  
-Adding components of variance did not improve model predictions substantially based on the difference in the expected-log-pointwise predictive densities $\Delta \widehat{\text{ELPD}}_{\text{loo}}$ and standard errors of the differences. Furthermore, estimates of regression coefficients do not change qualitatively between models. Thus, we report results from model 2 (varying intercepts for plants within species) because this model makes most biological sense to us by accounting for repeated measures on individual plants. Indeed, some Pareto-$\kappa$ values are high for this model, but because posterior distributions for regression coefficients do not change substantially between model 1 (all Pareto-$\kappa$ values okay) and model 2, it does not appear that the points with high Pareto-$\kappa$ values influence inference dramatically.
-
-
-```{r tube rates, echo=FALSE, eval=FALSE}
-
-  beta <- as.data.frame(rstan::extract(m2, pars="beta"))
-  beta_prime <- t(beta)
-
-# function to get means on pollen tube scale
-
-  pt_mean <- function(v, h){
-    exp(h%*%v)
-  }
-  
-
-  
-# create a dummy model matrix
-  
-    trtmnts <- c("HP", "SB", "LB")
-    spp <- rep(unique(av$Species), each=length(trtmnts))
-    newdat <- data.frame(as.factor(spp), factor(trtmnts, levels = trtmnts))
-    newdat$hrs_postmidn <- rep(0, nrow(newdat))
-    names(newdat) <- c("f.species", "f.trtmnt", "hrs_postmidn")
-    
-  X_new <- model.matrix(~hrs_postmidn + f.species*f.trtmnt -1, data = newdat)
-  
-  
-  df_means <- data.frame(apply(beta_prime, 2, pt_mean, h=X_new[1,]))
-  
-  for(i in 2:nrow(X_new)){
-    df_means <- cbind(df_means, data.frame(apply(beta_prime, 2, pt_mean, h=X_new[i,])))
-  }
-  
-  names(df_means) <- c("hirs_hp", "hirs_rtah", "hirs_greh", "ros_hp", "ros_rtah", "ros_greh",
-                       "tor_hp", "tor_rtah", "tor_greh", "wag_hp", "wag_rtah","wag_greh")
-  
-  sp <- c("H. hirsuta", "H. rostrata", "H. tortuosa", "H. wagneriana")
-  
-  post.means <- apply(df_means, 2, mean)
-  post.quants <- apply(df_means, 2, quantile, probs=c(0.025,0.1, 0.9,0.975))
-  
-  df_plot_means <- as.data.frame(cbind(post.means, t(post.quants)))
-  df_plot_means$trt <- rep(trtmnts, length(unique(spp)))
-  names(df_plot_means) <- c("mean", "low", "medlow", "medhigh", "high", "trt")
-  df_plot_means$trt <- factor(df_plot_means$trt, levels = c("HP", "SB", "LB"))
-  
-  greh.col <- rgb(42,157,143, maxColorValue = 255)
-  rtah.col <- rgb(255,107,107, maxColorValue = 255)
-  
-  mean_theme <- theme(panel.background = element_blank(),
-                      axis.line = element_line(colour = "darkgrey"),
-                      legend.position = "none",
-                      axis.text = element_text(size = 12, color="black"),
-                      plot.title = element_text(face = "italic"))
-  
-  hir <- ggplot(data = df_plot_means[1:3,], aes(x=trt, y=mean))+
-    geom_errorbar(ymin=df_plot_means$low[1:3], ymax=df_plot_means$high[1:3],
-                  size=0.5, width=0)+
-    geom_errorbar(ymin=df_plot_means$medlow[1:3], ymax=df_plot_means$medhigh[1:3],
-                  size=1.6, width=0)+
-    geom_point(size=5, color="white")+
-    geom_point(size=4, color="black")+
-    geom_point(size=3.5, aes(color=trt))+
-    ylim(c(0,3))+
-    scale_color_manual(values = c("black", rtah.col, greh.col))+
-    mean_theme+
-    xlab("")+
-    ylab("")+
-    ggtitle("H. hirsuta")
-  
-  
-  ros <- ggplot(data = df_plot_means[4:6,], aes(x=trt, y=mean))+
-    geom_errorbar(ymin=df_plot_means$low[4:6], ymax=df_plot_means$high[4:6],
-                  size=0.5, width=0)+
-    geom_errorbar(ymin=df_plot_means$medlow[4:6], ymax=df_plot_means$medhigh[4:6],
-                  size=1.6, width=0)+
-    geom_point(size=5, color="white")+
-    geom_point(size=4, color="black")+
-    geom_point(size=3.5, aes(color=trt))+
-    scale_color_manual(values = c("black", rtah.col, greh.col))+
-    mean_theme+
-    theme(axis.text.x=element_blank())+
-    scale_y_continuous(breaks = c(0,1,2), limits = c(0,2))+
-    xlab("")+
-    ylab("")+
-    ggtitle("H. rostrata")
-  
- 
-  tor <- ggplot(data = df_plot_means[7:9,], aes(x=trt, y=mean))+
-    geom_errorbar(ymin=df_plot_means$low[7:9], ymax=df_plot_means$high[7:9],
-                  size=0.5, width=0)+
-    geom_errorbar(ymin=df_plot_means$medlow[7:9], ymax=df_plot_means$medhigh[7:9],
-                  size=1.6, width=0)+
-    geom_point(size=5, color="white")+
-    geom_point(size=4, color="black")+
-    geom_point(size=3.5, aes(color=trt))+
-    ylim(c(0,3))+
-    scale_color_manual(values = c("black", rtah.col, greh.col))+
-    mean_theme+
-    theme(axis.text.x=element_blank())+
-    xlab("")+
-    ylab("")+
-    ggtitle("H. tortuosa")
-  
-  wag <- ggplot(data = df_plot_means[10:12,], aes(x=trt, y=mean))+
-    geom_errorbar(ymin=df_plot_means$low[10:12], ymax=df_plot_means$high[10:12],
-                  size=0.5, width=0)+
-    geom_errorbar(ymin=df_plot_means$medlow[10:12], ymax=df_plot_means$medhigh[10:12],
-                  size=1.6, width=0)+
-    geom_point(size=5, color="white")+
-    geom_point(size=4, color="black")+
-    geom_point(size=3.5, aes(color=trt))+
-    ylim(c(0,3))+
-    scale_color_manual(values = c("black", rtah.col, greh.col))+
-    mean_theme+
-    xlab("")+
-    ylab("")+
-    ggtitle("H. wagneriana")
-  
- png(filename = "~/Documents/Heliconia/Analyses/PR/PR_aviaries/means_plot.png", units = "px",
-      height = 2200, width = 1800, res = 300)
-   grid.arrange(tor,ros,hir,wag, nrow=2,ncol=2)
- dev.off()
-  
-  
-```  
-  
-  
-```{r contrast plot}
-  
-  df_effsz <- data.frame(df_means[,2]-df_means[,1], df_means[,3]-df_means[,1])
-  
-  for(i in 1:(length(sp)-1)){
-    df_effsz <- cbind(df_effsz, data.frame(df_means[,(3*i+2)]-df_means[,(3*i+1)], df_means[,(3*i+3)]-df_means[,(3*i+1)]))
-  }
-
-  species <- rep(sp, each=2)
-  treatment <- rep(c("RTAH", "GREH"), length(sp))
-  estim <- apply(df_effsz, 2, mean)
-  medl <- apply(df_effsz, 2, quantile, probs=0.1)
-  medh <- apply(df_effsz, 2, quantile, probs=0.9)
-  low <- apply(df_effsz, 2, quantile, probs=0.025)
-  high <- apply(df_effsz, 2, quantile, probs=0.975)
-  ypos <- c(8, 7.5, 6, 5.5, 4, 3.5, 2, 1.5)
-  
-  df.plot <- data.frame(species, treatment, estim, medl, medh, low, high, ypos)
-  df.plot$treatment <- factor(df.plot$treatment, levels = c("RTAH", "GREH"))
-  
-# annotate pr > 0
-  
-  pr_gt <- function(v, q){
-    mean(v > q)
-  }
-  
-  probs <- as.character(round(apply(df_effsz, 2, pr_gt, q=0), digits = 2))
-  probs2 <- round(apply(df_effsz, 2, pr_gt, q=0), digits = 3)
-  
-  x.lab <- expression(atop(atop("", "Difference in the number of pollen tubes per style"), (hat(lambda)[bird] - hat(lambda)[HP])))
-  
-  
-  png(filename = "~/Desktop/fig_1_300.png", units = "px", width = 2200, height = 1800, res = 300)
-  ggplot(data = df.plot, aes(x=estim, y=ypos))+
-    geom_vline(xintercept = 0)+
-    geom_errorbarh(xmin=low, xmax=high, height=0)+
-    geom_errorbarh(xmin=medl, xmax=medh, height=0, size=2)+
-    geom_point(colour="white", size=5)+
-    geom_point(aes(colour=treatment), size=4.5)+
-    xlim(c(-2,2.5))+
-    theme(panel.background = element_blank(),
-          axis.line = element_line(colour = "darkgrey"),
-          axis.text.x = element_text(size = 16),
-          axis.text.y = element_text(size = 14, colour = "black", face = "italic"),
-          axis.title.x = element_text(size = 18),
-          legend.title = element_blank(),
-          legend.text = element_text(size=12, margin = margin(t=0, b=0, r=20, l=0)),
-          legend.key = element_blank(),
-          legend.position = "top")+
-    scale_color_manual(values = c("black","turquoise4"))+
-    scale_y_continuous(breaks=c(1.75, 3.75, 5.75, 7.75), labels=sp[order(sp, decreasing = T)])+
-    annotate("text", x=rep(2.4, length(probs)), y=ypos, label=probs)+
-    xlab(x.lab)+
-    ylab("")
-
-  dev.off()
-  
-  
-  
-```
-$~$  
-
- To infer fold changes between treatments (e.g. $\hat \lambda_{\text{GREH}} / \hat \lambda_{\text{HP}}$), we exponentiate the the difference between appropriate marginal posterior distributions of regression parameters. To infer signed differences in pollen tube rates (e.g. $\hat \lambda_{\text{GREH}} - \hat \lambda_{\text{HP}}$), we exponentiate the appropriate marginal posterior distributions, then subtract one from the other.
-
-```{r fold changes, eval=FALSE, echo=FALSE}
-
-# function to compute fold change posteriors
-
-  foldc <- function(v, h1, h2){
-    exp((h1%*%v) - (h2%*%v))
-  }
-
-
-  hp_tor_mean <- exp(as.double(beta[,4]))
-  mean(hp_tor_mean)
-  quantile(hp_tor_mean, probs = c(0.025, 0.975))
-  
-  rtah_tor_mean <- exp(as.double(beta[,4] + beta[,6] + beta[,9]))
-  mean(rtah_tor_mean)
-  quantile(rtah_tor_mean, probs = c(0.025,0.975))
-  
-  tor_grehrtah <- exp(as.double(beta[,7] + beta[,12] -beta[,6] - beta[,9]))
-  mean(tor_grehrtah)
-  quantile(tor_grehrtah, probs = c(0.025,0.975))
-  
-  hp_ros_mean <- exp(as.double(beta[,3]))
-  mean(hp_ros_mean)
-  quantile(hp_ros_mean, probs = c(0.025,0.975))
-  
-  rtah_ros_mean <- exp(as.double(beta[,3] + beta[,6] + beta[,8]))
-  mean(rtah_ros_mean)
-  quantile(rtah_ros_mean, probs=c(0.025,0.975))
-  
-  greh_ros_mean <- exp(as.double(beta[,3] + beta[,7] + beta[,11]))
-  mean(greh_ros_mean)
-  quantile(greh_ros_mean, probs=c(0.025,0.975))
-  
-  tor_hpgreh <- apply(beta_prime, 2, foldc, h1=X_new[9,], h2=X_new[7,])
-  tor_hprtah <- apply(beta_prime, 2, foldc, h1=X_new[9,], h2=X_new[8,])
-  
-  ros_hpgreh <- apply(beta_prime, 2, foldc, h1=X_new[6,], h2=X_new[4,])
-  ros_hprtah <- apply(beta_prime, 2, foldc, h1=X_new[5,], h2=X_new[4,])
-  
-  wag_hpgreh <- apply(beta_prime, 2, foldc, h1=X_new[12,], h2=X_new[10,])
-  wag_hprtah <- apply(beta_prime, 2, foldc, h1=X_new[11,], h2=X_new[10,])
-
-```
-
-
 \subsubsection{References}
 
 
