@@ -21,20 +21,6 @@ knitr::opts_chunk$set(echo = TRUE)
     require(rstan)
     require(loo)
 
-# User-defined functions
-    hours <- function(x){
-        substr(x, 1, nchar(x)-2)
-    }
-
-    minutes <- function(x){
-      substr(x, nchar(x)-2+1, nchar(x))
-    }
-    
-# function to get means on pollen tube scale
-   pt_mean <- function(v, h){
-     exp(h%*%v)
-   }
-
 ```
 
 ### Load data
@@ -61,27 +47,46 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Summary
 
-To test whether pollen germination and tube growth is dependent on the identity and morphology of a floral visitor, we conducted pollination experiments with captive hummingbirds inside portable aviaries. In these experiments, we randomly assigned flowers to one of three experimental treatments: 1) hand-pollination only (HP treatment); 2) hand pollination followed by a visit from a pollen-free rufous-tailed hummingbird (SB treatment); 3) hand pollination followed by a visit from a pollen-free long-billed hummingbird (LB treatment).
+To test whether pollen germination and tube growth is dependent on the identity and morphology of a floral visitor, we conducted pollination experiments with captive hummingbirds inside portable aviaries. In these experiments, we randomly assigned flowers to one of three experimental treatments: 1) hand-pollination only (HP treatment); 2) hand pollination followed by a visit from a pollen-free rufous-tailed hummingbird (short, straight bills; SB treatment); 3) hand pollination followed by a visit from a pollen-free green hermit hummingbird (long, slightly decurved bill; LB treatment).
 
-In all experiments, we used only virgin flowers that had been covered with mesh bags prior to anthesis in order to preclude pollination by free-ranging pollinators. Flowers were not emasculated, however, due to extremely low numbers of pollen tubes in emasculated flowers in natural settings (A. S. Hadley, unpublished data).  Using small, portable  aviaries (1m x 1m x 2m; Figure S1) that we erected around live inflorescences, we standardized the number of pollinator visits to the flowers that were visited by birds (limited to one). Additionally, we standardized the quality of pollen available to flowers that received the control treatment (HP; no interaction with a hummingbird) and those visited by a hummingbird. We did this by hand pollinating two virgin flowers using pollen from the same donor, then randomly assigning one as a control which we covered with a paper sleeve during the experiment. The other was left open to a visit from a captive hummingbird (LB or SB) that we cleaned under 20x magnification prior to releasing into the aviary. We further attempted to reduce variation in the quantity of pollen available to the flowers by applying pollen in an even layer across the stigmatic surface with a toothpick under 20x magnification. The size of Heliconia pollen grains makes it impractical to quantify the number of grains on the stigma in the field, but all hand pollinations were conducted by the same experimenter to limit variability. After the hummingbird visited the treatment flower, we checked the stigma again to ensure that pollen was still present and in an even layer on the stigmatic surface. 
+This experiment follows a factorial design with factors for the plant species and the treatment, but due to limited numbers of flowering plants, we often conducted multiple experiments using flowers (the experimental units) from the same plant. We therefore fitted the model described below.
 
+### Model
 
-\subsection{Model}
-
-  We assume that pollen tube counts, $y_{i} \in \mathbb{R}^+$, $i=1,2,...,N$, are draws from Poisson distributions with rate parameters $\lambda_{i}$. We model the rate parameter as
+  Let $y_{ijkl} \in \mathbb{N}^+$ be the number of pollen tubes scored in the $l^\text{th}$ flower from the $k^\text{th}$ plant of species $j=1,..,4$ and $i$ index the treatment ($i=1,2,3$). We assume that $y_{ijkl} \overset{iid}{\sim} \text{Poisson}(\lambda_{ijk})$ for $l=1,...,n_k$. The model for the experiment can be written as
   
 $$
-\begin{split}
-\log \lambda_{i} = {\bf X}_{i}{\bm \beta} + \gamma_{p(s)}^{(i)};\\
-\\
-\gamma_{1,s}, \gamma_{2,s},...,\gamma_{P_s,s} \overset{iid}{\sim} \mathcal{N}(0, \sigma_s^2)
-\end{split}
+\log(\lambda_{ijk}) = \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \gamma_{k(j)}
+$$
+  
+where
+
+* $\mu$ is the overall mean log-pollen tube rate,
+
+* $\alpha_i,\ \sum_{i=1}^3 \alpha_i=0$, is the average deviation from the mean for flowers that received treatment $i$,
+
+* $\beta_j, \sum_{j=1}^4 \beta_j = 0$, is the average deviation from the mean for flowers of plant species $j$,
+
+* $(\alpha\beta)_{ij}, \sum_{i=1}^3 (\alpha\beta)_{ij} = \sum_{j=1}^4 (\alpha\beta)_{ij} = 0$, is the species\*treatment interaction effect,
+
+* $\gamma_{k(j)} \overset{iid}{\sim} \mathcal{N}(0, \sigma_j^2)$, for each of $k$ plants of species $j$, is a random effect for the plant that is nested within species.
+
+Because this model has an unconventional variance structure (random effects have unique variances depending on the plant species), we fit this model in a Bayesian framework. Furthermore, for ease of defining the model in `rstan` [@carpenter2017], we reparameterized the model to follow a regression parameterization with the reference level being hand pollinated flowers of *Heliconia hirsuta*. The model therefore reads
+
+$$
+\log{\boldsymbol \lambda} = {\bf X}{\boldsymbol \beta} + {\boldsymbol\gamma},
 $$
 
-where $P_s$ is the total number of plants of species $s$ used in experiments, $S$ is the number of species tested, and ${\bf X}_{i}$ is the $i^{\text{th}}$ row of the model matrix $\bf X$. We use the subscript $p(s)$ to indicated that the effect of plant $p$ is nested within species $s$, and superscript $(i)$ to be clear that the $i^\text{th}$ style came from plant $p$ of species $s$. In these experiments, we had 3 treatments (hand pollination only, hand pollination followed by a visit from a clean, short-billed hummingbird, and hand pollination followed by a visit from a long-billed hummingbird), and $S=4$ plant species. Thus, $\bf X$ is rank $K=S\times P$.
+where ${\bf X}$ is a matrix of indicator variables indicating the species, treatment, and plant individual for the $i^\text{th}$ observation, $i=1,...,n$.  
 
-We placed weakly informative priors on the elements of the $K$-dimensional regression parameter vector $\bm \beta$, assuming ${\bm \beta}_K \sim \mathcal{N}({\bf 0},\ 1.5\cdot {\bf I}_K)$, where ${\bf I}_K$ is the rank $K$ identity matrix, and the species-specific scale parameters such that $\sigma_s \sim \text{half-Normal}(0,1)$ for each $s \in \{1,2,...,S\}$. This structure allows us to account for repeated experiments on individual plants without assuming all plant effects are i.i.d. random variables, but instead that plant effects are i.i.d. within a species.
+#### Priors
 
+We use weakly informative priors (priors designed in a such a way as to be intentionally less-informative than a prior reflecting the information actually available [@gelman2006] for all regression coefficients such that all are independent and normally distributed with mean zero and standard deviation 1.5 (on the log scale). Importantly, a standard deviation of 1.5 was chosen to constrain samplers to biologically reasonable parameter space based on available literature reporting pollen tube rates in Heliconia. @kress1983 reports a ~4.08-fold change (a regression coefficient of ~1.407), comparing minimum and maximum pollen tube rates from nine species. Similarly, [@pedersen1999] report a ~4.00-fold increase in pollen tube rates in H. paka when comparing flowers visited by honeyeaters to cross-pollinations by hand, a ~60-fold increase comparing rates of autogamous selfing to honeyeater pollination, and a 3.3-fold increase in pollen tube rates in H. laufo when comparing autogamous selfing to honeyeater pollination. Previous work in this system shows pollen tube rates in H. tortuosa are maximized following visits from violet sabrewing hummingbirds (Campyloterus hemileucurus), a ~5.7-fold increase from ineffective pollinators [@betts2015]. A $\mathcal{N}(0, 1.5)$ prior on regression coefficients on the log scale reflects the presumption that most (95%) of the time, we will not see fold-changes greater than ~20 when comparing pollen tube rates in Heliconia. Thus, we think these priors are a good balance among being conservative (concentrating some mass around zero such that signals in the data need to be strong to suggest differences between treatments), vague about prior information, and within the realm of biological plausibility.
+
+For the species-specific scale parameters, we define the priors $\sigma_j \sim \text{half-Normal}(0,1)$ for each $j \in \{1,2,3,4\}$. This structure allows us to account for potential correlation among flowers from the same individual plant without assuming all plant effects are i.i.d. random variables, but instead that plant effects are i.i.d. within a species.
+
+
+### Stan model code
 
 ```{stan output.var="poisson_model", eval=FALSE}
 
@@ -91,12 +96,11 @@ We placed weakly informative priors on the elements of the $K$-dimensional regre
     int K;         //number of regressions parameters
     int P;         //number of unique plants sampled (i.e. number of intercepts)
     int S;         //number of species in the analysis
-    int pl[N];  //index for the plant in experiment i
+    int pl[N];     //index for the plant in experiment i
     int sp[N];     //index for the plant species in experiment i
     int<lower=0> y[N];  //observations
     matrix[N,K] X;      //design matrix
-    //real mu_prior;      // prior mean for grand mean
-  
+
   }
   
   parameters{
@@ -120,7 +124,6 @@ We placed weakly informative priors on the elements of the $K$-dimensional regre
   model{
   
     //priors
-    //beta[1] ~ normal(mu_prior, 0.5);
     for(k in 1:K){
       beta[k] ~ normal(0,1.5);
     }
@@ -142,8 +145,8 @@ We placed weakly informative priors on the elements of the $K$-dimensional regre
 
   generated quantities{
   
-    vector[N] loglik;
-    int y_rep[N];
+    vector[N] loglik;     //log likelihood
+    int y_rep[N];         //predicting new y with same linear predictor
     
     for(n in 1:N){
       loglik[n] = poisson_lpmf(y[n] | lambda[n]);
@@ -156,31 +159,49 @@ We placed weakly informative priors on the elements of the $K$-dimensional regre
 ```
   
   
-```{r run m1, echo=FALSE, include=FALSE, eval=FALSE}
+**Compile data**
+
+
+```{r compile}
 
 # compile data to give to stan
 
+# number of observations
   N <- dim(av)[1]
+# response
   y <- av$Tube_Count
-  
-  X <- model.matrix(~f.species*f.trtmnt -1,
+# design matrix  
+  X <- model.matrix(~f.species*f.trtmnt,
                     data = av)
+# number of regression parameters
   K <- dim(X)[2]
+# integer vector indicating which plant was used
   pl <- as.integer(as.factor(av$Plant))
+# integer vector indicating which species was tested
   sp <- as.integer(av$f.species)
+# total number of plant species
   S <- length(unique(sp))
+# total number of unique plants
   P <- length(unique(pl))
-  
-  
-  mod.data <- list(N=N, K=K, S=S, P=P,
+
+# compile data into named list  
+  mod.data <- list(
+                   N=N, K=K, S=S, P=P,
                    sp=sp, pl=pl,
-                   y=y, X=X)
-                  #mu_prior=log(grand_mean))
+                   y=y, X=X
+                   )
   
+```
+
+
+**Fit the model**
+
+```{r fit model, eval=FALSE}
+                 
+# sample from the posterior defined by the stan model  
   mfit <- sampling(poisson_model, data=mod.data)  
   
 # looic and other model assessments
-  
   loglik <- extract_log_lik(mfit, "loglik", merge_chains = FALSE)
   
   reff <- relative_eff(exp(loglik))
@@ -192,11 +213,59 @@ We placed weakly informative priors on the elements of the $K$-dimensional regre
   
 ```
 
+
+### A couple of posterior-predictive checks
+
+```{r, reload fit, echo=FALSE, message=FALSE}
+mfit <- readRDS(file = here("Data", "av_model_fit.rds"))
+```
+
+
+```{r}
+# matrix of 4000 new, predicted datasets of the same length
+y_preds <- as.data.frame(extract(mfit, pars="y_rep"))
+
+# calculate proportion == i for each new dataset
+draw_means <- map(0:2,
+                  ~apply(y_preds, 1, function(v){mean(v == .x)}))
+draw_means[[4]] <- apply(y_preds, 1, function(v){mean(v >= 3)})
+
+
+# compute means and intervals across 4000 predictions
+postpred <- tibble(
+  cat = factor(c("Prop. 0", "Prop. 1",
+          "Prop. 2", "Prop >= 3"),
+          levels = c("Prop. 0", "Prop. 1",
+          "Prop. 2", "Prop >= 3")),
+  obs = c(mean(y == 0),
+          mean(y==1),
+          mean(y==2),
+          mean(y >= 3)),
+  pred = map_dbl(draw_means,
+                 ~mean(.x)),
+  low = map_dbl(draw_means,
+                ~quantile(.x, probs = 0.025)),
+  high = map_dbl(draw_means,
+                 ~quantile(.x, probs = 0.975))
+)
+
+# posterior predictive plot
+ggplot(data = postpred, aes(x=obs, y=cat))+
+  geom_errorbarh(aes(xmin=low, xmax=high), height=0, size=3)+
+  geom_point(aes(x=pred), size=6)+
+  geom_point(size=2, color="red")+
+  xlab("Proportion")+
+  ylab("")
+
+```
+
+**Figure 1**: Posterior predicted values and 95% credible intervals (in black) for the proportion of observations equal to zero, one, and two, and the proportion of observations greater than three in a new dataset with the same ${\bf X}$ as the observed data. Observed proportions are plotted in red. The model tends to slightly over-predict the number of ones we expect to see in a dataset of this size, predicting on average 10 more than what we observed. However, all observed values are within the prediction intervals, indicating a decent model fit. 
+
 $~$
 
 ************
  
-\subsubsection{References}
+### References
 
 
 
