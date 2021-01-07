@@ -1,5 +1,5 @@
 ---
-title: "Appendix S4: Testing for generality of pollinator recognition in *Heliconia* - Testing for mechanisms"
+title: "Testing for generality of pollinator recognition in *Heliconia* - creating figure 2"
 author: "D. G. Gannon, A. S. Hadley, U. G. Kormann, F. A. Jones, and M. G. Betts"
 output:
   github_document:
@@ -11,65 +11,84 @@ header-includes:
 bibliography: /Users/dusty/Documents/zotero_library.bib
 ---
 
+### R packages
+```{r setup, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+    require(tidyverse)
+    require(here)
+    require(rstan)
+    require(loo)
+    require(grid)
+    require(gridExtra)
+
+```
+
+
+### Load model fit and data
+
+```{r}
+
+load(file = here("Data", "nectar_experiments_mfit.RData"))
+
+```
+
+
 
 ```{r fig 3 main text, echo=FALSE, eval=FALSE}
 
-  X <- mod.data[["X"]]
+# create new data
+  newdat <- data.frame(
+    species = rep(c("H.rostrata", "H.tortuosa", "H.wagneriana"),
+                  each=4),
+    treatment = rep(c("HP", "PM", "HPNE", "NEHP"), 3)
+  )
+# factor the variables
+  newdat <- newdat %>% mutate(
+    f.species = as.factor(species),
+    f.trt = factor(treatment,
+                   levels = c("HP", "PM", "HPNE", "NEHP"))
+  )
+
+# Create new X
+  X_new <- model.matrix(~f.trt*f.species, data = newdat)
+  
+# sanity check that the columns match
+  all.equal(colnames(X), colnames(X_new))
+
+# extract posterior draws for beta
   beta_post <- as.matrix(as.data.frame(extract(mfit, pars="beta")))
   
-# create vectors for linear predictors
-  hpros <- as.double(X[which(nectar$Species == "H.rostrata" & 
-                               nectar$f.trt == "HP")[1], ])
-  bmros <- as.double(X[which(nectar$Species == "H.rostrata" & 
-                               nectar$f.trt == "PM")[1], ])
-  hpneros <- as.double(X[which(nectar$Species == "H.rostrata" & 
-                               nectar$f.trt == "HPNE")[1], ])
-  nehpros <- as.double(X[which(nectar$Species == "H.rostrata" & 
-                               nectar$f.trt == "NEHP")[1], ])
-  hptor <- as.double(X[which(nectar$Species == "H.tortuosa" & 
-                               nectar$f.trt == "HP")[1], ])
-  bmtor <- as.double(X[which(nectar$Species == "H.tortuosa" & 
-                               nectar$f.trt == "PM")[1], ])
-  hpnetor <- as.double(X[which(nectar$Species == "H.tortuosa" & 
-                               nectar$f.trt == "HPNE")[1], ])
-  nehptor <- as.double(X[which(nectar$Species == "H.tortuosa" & 
-                               nectar$f.trt == "NEHP")[1], ])
-  hpwag <- as.double(X[which(nectar$Species == "H.wagneriana" & 
-                               nectar$f.trt == "HP")[1], ])
-  bmwag <- as.double(X[which(nectar$Species == "H.wagneriana" & 
-                               nectar$f.trt == "PM")[1], ])
-  hpnewag <- as.double(X[which(nectar$Species == "H.wagneriana" & 
-                               nectar$f.trt == "HPNE")[1], ])
-  nehpwag <- as.double(X[which(nectar$Species == "H.wagneriana" & 
-                               nectar$f.trt == "NEHP")[1], ])
-
+# Transpose beta
+  beta_prime <- t(beta_post)
+  
+# Predict using each of the draws from beta
+  loglam <- X_new %*% beta_prime
+  lambda_post <- exp(loglam)
   
 # Create posterior means and CIs
   species <- rep(c("H. rostrata", "H. tortuosa", "H. wagneriana"), each=4)
   trt <- rep(c("HP", "HP + \npipette", "HP + \nnectar \nextraction", "Nectar \nextraction + \nHP"), 3)
-  X.unique <- rbind(hpros, bmros, hpneros, nehpros,
-                    hptor, bmtor, hpnetor, nehptor,
-                    hpwag, bmwag, hpnewag, nehpwag)
-  
-  loglambda_post <- beta_post%*%t(X.unique)
-  lambda_post <- apply(loglambda_post, 2, exp)
-  
+
   df.plot <- data.frame(species=species, trt=trt,
-                          estim=apply(lambda_post, 2, mean),
-                          low=apply(lambda_post,2,quantile, probs=0.025),
-                          medlow=apply(lambda_post,2,quantile, probs=0.1),
-                          medhigh=apply(lambda_post,2,quantile, probs=0.9),
-                          high=apply(lambda_post,2,quantile, probs=0.975))
+                          estim=apply(lambda_post, 1, mean),
+                          low=apply(lambda_post,1,quantile, probs=0.025),
+                          medlow=apply(lambda_post,1,quantile, probs=0.1),
+                          medhigh=apply(lambda_post,1,quantile, probs=0.9),
+                          high=apply(lambda_post,1,quantile, probs=0.975))
+  
+# factor trt for ggplot
   df.plot$trt <- factor(df.plot$trt, 
-                        levels = c("HP", "HP + \npipette", "HP + \nnectar \nextraction", "Nectar \nextraction + \nHP"))
+                        levels = c("HP", 
+                                   "HP + \npipette", 
+                                   "HP + \nnectar \nextraction",
+                                   "Nectar \nextraction + \nHP"))
   
   plottheme <- theme(panel.background = element_blank(),
                      axis.line = element_line(colour = "black"),
                      plot.title = element_text(face="italic", size = 16),
                      axis.text = element_text(colour = "black", size = 12),
                      axis.title = element_text(size = 16))
-  
-  xtitle <- textGrob("Pollen tubes per style", rot = 90, gp=gpar(fontsize=20))
   
   ros <- ggplot(data = df.plot[1:4,], aes(x=trt, y=estim))+
     geom_errorbar(ymin=df.plot$low[1:4], ymax=df.plot$high[1:4], width=0)+
@@ -108,51 +127,12 @@ bibliography: /Users/dusty/Documents/zotero_library.bib
     scale_y_continuous(breaks=c(0,1,2,3), labels = c("0.0", "1.0", "2.0", "3.0"), 
                        limits = c(0,3.5))
   
-  lo <- rbind(c(1,2,2,2,2,2),
-              c(1,3,3,3,3,3),
-              c(1,4,4,4,4,4))
-  
-png(filename = "~/Documents/Heliconia/Analyses/PR/PR_HPvsHPNE_short/figure_3_means_plot.png", width = 1800, height = 3000,
+png(filename = here("Figures", "fig2_means_pre_annot.png"), width = 1500, height = 3000,
       res = 300)
-  grid.arrange(xtitle, ros, tor, wag, layout_matrix=lo)
+  grid.arrange(ros, tor, wag)
 dev.off()
 
 ```
 
 
-```{r eval=FALSE, echo=FALSE}
 
-  beta_post_full <- as.matrix(as.data.frame(extract(mfit, pars="beta")))
-  X <- mod.data[["X"]]
-
-  hpros_full <- as.double(X[which(nectar$Species == "H.rostrata" & 
-                               nectar$f.trt == "HP")[1], ])
-  nehpros_full <- as.double(X[which(nectar$Species == "H.rostrata" & 
-                               nectar$f.trt == "NEHP")[1], ])
-  hptor_full <- as.double(X[which(nectar$Species == "H.tortuosa" & 
-                               nectar$f.trt == "HP")[1], ])
-  nehptor_full <- as.double(X[which(nectar$Species == "H.tortuosa" & 
-                               nectar$f.trt == "NEHP")[1], ])
-  hpwag_full <- as.double(X[which(nectar$Species == "H.wagneriana" &
-                                    nectar$f.trt == "HP")[1], ])
-  nehpwag_full <- as.double(X[which(nectar$Species == "H.wagneriana" & 
-                               nectar$f.trt == "NEHP")[1], ])
-# H. rostrata
-  mean(exp(as.double(beta_post_full%*%nehpros_full) - 
-             as.double(beta_post_full%*%hpros_full)))
-  quantile(exp(as.double(beta_post_full%*%nehpros_full) - 
-             as.double(beta_post_full%*%hpros_full)), probs = c(0.025,0.975))
-  
-# H. tortuosa
-  mean(exp(as.double(beta_post_full%*%nehptor_full) - 
-             as.double(beta_post_full%*%hptor_full)))
-  quantile(exp(as.double(beta_post_full%*%nehptor_full) - 
-             as.double(beta_post_full%*%hptor_full)), probs = c(0.025,0.975)) 
-  
- # H. wagneriana
-  mean(exp(as.double(beta_post_full%*%nehpwag_full) - 
-             as.double(beta_post_full%*%hpwag_full)))
-  quantile(exp(as.double(beta_post_full%*%nehpwag_full) - 
-             as.double(beta_post_full%*%hpwag_full)), probs = c(0.025,0.975))  
-
-```

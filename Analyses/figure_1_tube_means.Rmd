@@ -1,0 +1,280 @@
+---
+title: "Testing for generality of pollinator recognition in *Heliconia*: Analysis of aviary data"
+author: "D.G. Gannon, A.S. Hadley, U.G. Kormann, F.A. Jones, M.G. Betts"
+header-includes:
+  \usepackage{setspace}
+  \onehalfspacing
+bibliography: /Users/dusty/Documents/zotero_library.bib
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+  require(tidyverse)
+  require(rstan)
+  require(gridExtra)
+  require(here)
+
+# Functions
+
+ # function to get means on pollen tube scale
+   pt_mean <- function(v, h){
+     exp(h%*%v)
+   }
+
+```
+
+\subsection{Create panel figure}
+
+**Bring in data on open pollination pollen tube rates for reference**
+
+```{r}
+
+# read in open pollination data
+
+ hpop <- read_csv(file = here("Data", "HPvsOP_all.csv"))
+
+ sp <- c("H.hirsuta", "H.rostrata",
+        "H.tortuosa", "H.wagneriana")
+
+ hpop_sub <- hpop[which(hpop$Treatment == "OP" & 
+                         hpop$Species %in% sp), ]
+
+# come up with a grand mean
+
+hpop_sub_grp <- group_by(hpop_sub, Species)
+
+# summarize the tube rates in each species
+ op_means_sp_pl <- hpop_sub_grp %>% 
+   summarise(.,
+            nplants=length(unique(Plant)),
+            tube_rate=mean(Tube_Count),
+            sd=sd(Tube_Count)
+            )
+
+# add se
+ op_means_sp_pl <- op_means_sp_pl %>%
+   mutate(
+     se = sd/sqrt(nplants)
+   )
+```
+
+
+
+```{r tube rates, echo=FALSE, eval=FALSE}
+# load data and model fit
+  av <- read_csv(file = here("Data", "aviaries_data.csv"))
+  mfit <- readRDS(file = here("Data", "av_model_fit.rds"))
+
+#Extract the regression parameter posteriors
+  beta <- as.data.frame(extract(mfit, pars="beta"))
+  beta_prime <- t(beta)
+
+# create a dummy model matrix
+  
+    trtmnts <- c("HP", "SB", "LB")
+    spp <- rep(unique(av$Species), each=length(trtmnts))
+    newdat <- data.frame(
+      f.species=as.factor(spp), 
+      f.trtmnt = factor(trtmnts, levels = trtmnts)
+      )
+  
+# new model matrix 
+  X_new <- model.matrix(~f.species*f.trtmnt -1, data = newdat)
+  
+# create data frame pollen tube rates 
+  df_means <- data.frame(apply(beta_prime, 2, pt_mean, h=X_new[1,]))
+  
+  for(i in 2:nrow(X_new)){
+    df_means <- cbind(df_means, data.frame(apply(beta_prime, 2, pt_mean, h=X_new[i,])))
+  }
+  
+  names(df_means) <- c("hirs_hp", "hirs_rtah", "hirs_greh", "ros_hp", "ros_rtah", "ros_greh",
+                       "tor_hp", "tor_rtah", "tor_greh", "wag_hp", "wag_rtah","wag_greh")
+  
+  sp <- c("H. hirsuta", "H. rostrata", "H. tortuosa", "H. wagneriana")
+  
+  post.means <- apply(df_means, 2, mean)
+  post.quants <- apply(df_means, 2, quantile, probs=c(0.025,0.1, 0.9,0.975))
+  
+  df_plot_means <- as.data.frame(cbind(post.means, t(post.quants)))
+  df_plot_means$trt <- rep(trtmnts, length(unique(spp)))
+  names(df_plot_means) <- c("mean", "low", "medlow", "medhigh", "high", "trt")
+  df_plot_means$trt <- factor(df_plot_means$trt, levels = c("HP", "SB", "LB"))
+  
+# Different colors for bird treatments?
+  # greh.col <- rgb(42,157,143, maxColorValue = 255)
+  # rtah.col <- rgb(255,107,107, maxColorValue = 255)
+
+  
+  mean_theme <- theme(panel.background = element_blank(),
+                      axis.line = element_line(colour = "darkgrey"),
+                      legend.position = "none",
+                      axis.text = element_text(size = 12, color="black"),
+                      plot.title = element_text(face = "italic",
+                                                size=16))
+  
+  hir <- ggplot(data = df_plot_means[1:3,], aes(x=trt, y=mean))+
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[1],
+      color="darkgrey", 
+      linetype="longdash"
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[1] + 
+        op_means_sp_pl$se[1],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[1] - 
+        op_means_sp_pl$se[1],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) +    
+    geom_errorbar(ymin=df_plot_means$low[1:3], ymax=df_plot_means$high[1:3],
+                  size=0.5, width=0)+
+    geom_errorbar(ymin=df_plot_means$medlow[1:3], ymax=df_plot_means$medhigh[1:3],
+                  size=1.6, width=0)+
+    geom_point(size=5, color="white")+
+    geom_point(size=4, color="black")+
+    ylim(c(0,3))+
+    mean_theme+
+    xlab("")+
+    ylab("")+
+    ggtitle("H. hirsuta")
+  
+  
+  ros <- ggplot(data = df_plot_means[4:6,], aes(x=trt, y=mean))+
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[2],
+      color="darkgrey", 
+      linetype="longdash"
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[2] + 
+        op_means_sp_pl$se[2],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[2] - 
+        op_means_sp_pl$se[2],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) +  
+    geom_errorbar(ymin=df_plot_means$low[4:6], ymax=df_plot_means$high[4:6],
+                  size=0.5, width=0)+
+    geom_errorbar(ymin=df_plot_means$medlow[4:6], ymax=df_plot_means$medhigh[4:6],
+                  size=1.6, width=0)+
+    geom_point(size=5, color="white")+
+    geom_point(size=4, color="black")+
+    mean_theme+
+    theme(axis.text.x=element_blank())+
+    scale_y_continuous(breaks = c(0,1,2), limits = c(0,2))+
+    xlab("")+
+    ylab("")+
+    ggtitle("H. rostrata")
+  
+ 
+  tor <- ggplot(data = df_plot_means[7:9,], aes(x=trt, y=mean))+
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[3],
+      color="darkgrey", 
+      linetype="longdash"
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[3] + 
+        op_means_sp_pl$se[3],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[3] - 
+        op_means_sp_pl$se[3],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) + 
+    geom_errorbar(ymin=df_plot_means$low[7:9], ymax=df_plot_means$high[7:9],
+                  size=0.5, width=0)+
+    geom_errorbar(ymin=df_plot_means$medlow[7:9], ymax=df_plot_means$medhigh[7:9],
+                  size=1.6, width=0)+
+    geom_point(size=5, color="white")+
+    geom_point(size=4, color="black")+
+    ylim(c(0,3))+
+    mean_theme+
+    theme(axis.text.x=element_blank())+
+    xlab("")+
+    ylab("")+
+    ggtitle("H. tortuosa")
+  
+  wag <- ggplot(data = df_plot_means[10:12,], aes(x=trt, y=mean))+
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[4],
+      color="darkgrey", 
+      linetype="longdash"
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[4] + 
+        op_means_sp_pl$se[4],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) +
+    geom_hline(
+      yintercept = op_means_sp_pl$tube_rate[4] - 
+        op_means_sp_pl$se[4],
+      color="grey",
+      linetype="dashed",
+      size=0.5
+    ) + 
+    geom_errorbar(ymin=df_plot_means$low[10:12], ymax=df_plot_means$high[10:12],
+                  size=0.5, width=0)+
+    geom_errorbar(ymin=df_plot_means$medlow[10:12], ymax=df_plot_means$medhigh[10:12],
+                  size=1.6, width=0)+
+    geom_point(size=5, color="white")+
+    geom_point(size=4, color="black")+
+    ylim(c(0,3))+
+    mean_theme+
+    xlab("")+
+    ylab("")+
+    ggtitle("H. wagneriana")
+  
+ png(filename = here("Figures", "means_plot.png"), units = "px",
+      height = 1800, width = 1800, res = 300)
+   grid.arrange(tor,ros,hir,wag, nrow=2,ncol=2)
+ dev.off()
+  
+  
+```
+
+**Sample sizes**
+
+```{r}
+
+# Summary table of experiments
+  
+  smry_table <- group_by(av, Species, Treatment) %>%
+    summarise(., n=n())
+  
+# Summary table of plants of each species
+  smry_plants <- group_by(av, Species) %>%
+    summarise(.,
+              plants=length(unique(Plant)))
+  
+```
+
+```
+
+
+
+
+
+
