@@ -6,9 +6,11 @@
 
  > Is there literature on the pollinator efficiencies of visitors to these taxa? Or, more general information about whether pollinators with mismatched bill shapes are typically less efficient pollinators?
 
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-**Notes**
+**Response**
+
+This is an excellent question. While there exists some literature on pollination efficiency and trait matching for other taxa, knowledge of the pollination efficiencies of the visitors to these *Heliconia* species is very limited. We have included some discussion and relevant sources in the revised Discussion section.
 
 * *H. rostrata*
 
@@ -23,6 +25,13 @@
  > Which taxa are primary visitors of these *Heliconia* species in the wild?
 
 * [ ] Addressed in lines ...
+
+**Response**
+
+We recognize that, if these *Heliconia* species are visited primarily by morphologically matched pollinators, this would refute our hypothesis of pollinator recognition as a pollinator filter. Little is known about the pollinator assemblages for these taxa, but based on data collected by some of the authors here and colleagues, *H. tortuosa* plants receive a considerable number of visits from mismatched pollinators in Coto Brus, Costa Rica, supporting our hypothesis. Furthermore, we elaborate on our arguments that cryptic pollinator filters could increase the likelihood of coextinction events. Given the local extinction of a well-matched pollinator, mismatched pollinators may shift their behaviors to exploit newly available resources. However, if pollen tubes fail to grow following visits from mismatched visitors, a shift in behavior would not compensate the loss of the well-matched pollinator, making coextinction of the plant more likely. We have detailed these arguments more carefully in the revised manuscript.
+
+
+
 
 **Notes**
 
@@ -75,101 +84,129 @@
 
  > The finding that hand pollinations resulted in fewer pollen tubes than naturally outcrossed flowers exposed to hummingbird visits is not necessarily evidence of pollinator recognition. Rather, it indicates that something about hand pollination does not duplicate the natural pollination process, which beyond the hummingbird itself, could depend upon the timing of the pollinator visit in relation to the life of the flower, the number of hummingbird visits, or nectar removal.
 
-* [ ] Addressed in lines ...
+* [x] Addressed
+
+**Response**
+
+We completely agree with this comment and, while we included text on the limitations of comparing hand pollination to open pollination in the original version of the manuscript (lines 117-125), we chose to remove those data from this version of the manuscript. This should help shift the focus to the experiments in which we standardized pollen quality between flowers visited by hummingbirds and those used as hand pollinated controls. In these experiments, we are also able to standardize the number of bird visits (limited to 1) and reduced variation in pollen quantity on each style. We do, however, include estimates of the mean pollen tube counts in flowers left open to free-ranging pollinators as a reference in Figure 1. 
   
 ### 1.2
 
  > Nectar removal seems the most likely explanation, and was the explanation offered by Betts et al. 2015. Yet in the current study, hand pollination plus nectar removing using a pipettor did not enhance pollen tube growth, thereby mimicking the results for natural hummingbird pollinators.  Possibly, bills or tongues be doing something mechanical inside the flower, such as pushing and relocating the staminode, or triggering something physiological in the nectar chamber. Alternatively, methods of this study may have differed from those in Betts et al., yet it is unclear how or why they would, given that removing nectar with a pipettor and hand-pollinating flowers are pretty straight forward methods. The inconsistent results call into question pollinator recognition and raise issues about methods and/or the genetics of the plants used in the experiments.
 
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
   
-  **Notes**
+ **Response**
   
-* I would argue that these issues only call into question the *mechanism* of PR, considering that we used the same plants in the aviaries and found increased pollen tube rates following bird visits. It should therefore not call PR into question in general or raise issues about the methods/genetics.
+Indeed, these results are quite puzzling to us as well, and we agree that hummingbird tongues are comlex organs with many characteristics we simply cannot reproduce. It remains a possiblility, as suggested, that hummingbird tongues could trigger the response. However, we argue that the inconsistent results only call into question the *mechanism* of pollinator recognition, considering that we used the same collection of plants in both sets of experiments (the aviary experiments and the nectar removal experiments) and found increased pollen tube rates following bird visits. If the genetics of these plants was the reason for a lack of a response to nectar removal, we would not expect a response to visits by clean hummingbirds either.
 
-### 1.3  
+### 1.3 
 
  > To what extent might the low number of pollen tubes result from using experimental plants derived from the same genetic stock? Which species were ornamentals, which species were naturalized, and which species were native? Garden or naturalized plants might have low genetic diversity or may have been selected through the breeding process for low reproductive output. Did you check these plants to see whether they were in fact setting fruits and seeds?
 
-* [ ] Addressed in lines ...
+* [x] Confirmed that we checked for seeds in lines ...
+* [x] Addressed issue of genetic diversity in lines ...
+* [x] Which are native and which are not? Addressed in lines ...
   
-  **Notes**
-  
-* *H. tortuosa* - Native
+**Response**
 
-  *H. rostrata* - Ornamental. Native to western South America (Bernal et al. 2016).
-  
-  *H. wagneriana* - Native. (Stiles 1975, 1979).
-  
-  *H. hirsuta* - Native to Trinidad and South America (Snow and Snow, 1972; Bernal et al. 2016).
-  
-  *H. metallica* - Ornamental
-  
-  *H. regalis* - Ornamental
+While we agree that the experimental design would be strengthened by conducting these experiments in natural settings using larger populations of each plant species, we were unable to do so here. This is certainly a goal for the future. 
 
-1.4
+In our selection process, we targetted plant species in the living collection at Las Cruces Biological station that were also found on neighboring properties to increase our chances of utilizing a more diverse genetic stock. We additionally checked that each species was setting fruits and seeds, confirming that compatible pollen was available in the area and that it was likely that birds were visiting the flowers despite some being non-native. We include more details on this point in the revised Methods section and in a revised appendix. 
+  
+* *H. tortuosa* - Native. (Stiles 1975, 1979)
+
+* *H. rostrata* - Ornamental/naturalized(?). Native to western South America (Bernal et al. 2016).
+  
+* *H. wagneriana* - Native to Costa Rica. (Stiles 1975, 1979).
+  
+* *H. hirsuta* - Native to Trinidad and South America (Snow and Snow, 1972; Bernal et al. 2016).
+  
+
+### 1.4
 
  > How many plants and flowers of each Heliconia species were used in the aviary experiments? In addition, how many birds of each bill morphology were used in these experiments? More precisely, readers need to know the number of experimental units for each Heliconia species x experimental trial treatment.
 
-* [ ] Sample sizes added to figures
+* [x] Sample sizes added to figures
 
-1.5
+**Response**
+
+We thank reviewer 1 for this request, and added a table with the number of unique plants (blocking effect) and numbers of flowers (experimental units) scored for pollen tubes in each species $\times$ treatment combination. 
+
+* [x] Number of plants of each species
+
+* [x] Number of hummingbirds of each species added in lines
+
+### 1.5
 
  > How were the aviaries constructed? Were you actually building them around live inflorescences of natural plants? Can you provide a photograph in an appendix?
 
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
+* [x] Photograph added to Appendix S1
 
-1.6
+**Response**
+
+We constructed portable aviaries using a PVC frame and bamboo legs. We sewed a mesh net sleeve that slid easily over the frame. This allowed us to erect aviaries around live inflorescences. We included more details on aviary construction in the revised methods section and in the revised appendix.
+
+### 1.6
 
  > Do you have any idea on the frequency of visits by hummingbirds to your plants and flowers in the free-ranging pollination experiments depicted in Figure 1? Was the same flower getting visited more than once? (lines 108-117)
  
-* [ ] Addressed in lines ...
+* [x] Addressed
 
-1.7
+**Response**
+
+We elected to remove those data from this version of the manuscript in order to maintain the focus on the experiments in which we standardized the number of floral visits. Based on data in Gannon et al. (2018), open flowers tend to receive multiple visits per day.
+
+### 1.7
 
  > It would be nice to know the number of pollen grains deposited on a stigma both for hand pollinations, open-pollinations (Fig. 1), and following visits by birds to hand-pollinated flowers. Having this information might help elucidate pollination mechanisms
  
-* [ ] Addressed in lines ...
+* ~~[ ] Addressed in lines~~ 
 
-**Thoughts**
+**Response**
 
-* This simply does not seem feasible, especially if we also want to quantify pollen tubes in the same flower. 
+We wholeheartedly agree that it would be nice to have these data, but we have not had success in collecting them. First, quantification of the number of pollen grains we placed on the stigma during hand pollination treatments does not seem feasible in the field. The pollen grains are too small to count with a hand lens. Second, we have not had success quantifying pollen grains on the stigma the day after pollination due to problems with molding and potentially pollen loss during transport back to the lab.
 
-1.8 
+### 1.8 
 
  > Similarly, it would be nice to know the degree to which pollen tubes translate into seeds.
  
-* [ ] Addressed in lines ...
+* ~~[ ] Addressed in lines ...~~
 
-**Thoughts**
+**Response**
 
-* This is simply not going to happen with the data we have.
+Unfortunately, this is not data we will be able to include here, though it is an experiment we hope to complete in the future.
 
-1.9 
+### 1.9 
 
  > The mean number of pollen tubes in this experiment is exceedingly small (0 to 1). One would think with hand pollination that one would get maximum pollen tube growth, but that doesn't happen, which makes Heliconias so interesting. I'd be interested to know whether the number of pollen tubes increases with the number of natural visits by hummingbirds (as well as pollen donors).
  
-* [ ] Addressed in lines ...
+* ~~[ ] Addressed in lines ...~~
 
-1.10
+**Response**
+
+This is an interesting idea, but is perhaps beyond the scope of this manuscript. One of the major challenges with obtaining data such as these is that it is not an easily manipulated system. Ideally, we would create different pollen pools with varying numbers of pollen donors and supply these different pools to stigmas by hand, but hand pollinations are notoriously unsuccessful with *Heliconia* species. These are worthwhile experiments for the future. 
+
+### 1.10
 
  >  I also wonder whether the low mean number of pollen tubes and the design of the study makes it difficult to detect differences, if they exist.
  
-* [ ] Addressed in lines ...
+* ~~[ ] Addressed in lines ...~~
  
- **Thoughts**
+**Response**
  
- * I think this could be happening with *H. rostrata*.
+The low mean numbers of pollen tubes likely does make detecting differences difficult, but that is part of the reason we find the consistency of the results from the aviary experiments with *H. tortuosa* so compelling. We do not argue that the study design could be strengthened by conducting these experiments in large, naturally occurring populations of these plants, but that would require travel to and research in multiple countries. Given the logistical (and not to mention monetary) challenge of that approach, we opted for conducting these experiments in a living collection where multiple species can be targetted at once. We hope the reviewers agree that, while imperfect, this seems like a good first step towards testing the generality of pollinator recognition. 
  
-1.11
+### 1.11
 
  > Did birds remove nectar from flowers in the field and aviary experiments, and if so, how much?
  
 * [ ] Addressed in lines ...
 
-**Thoughts**
+**Response**
 
-* I think we already cover why we don't have data on this, but we could add that they do remove at least some nectar which we can back up with the videos where one can clearly see the birds drinking.
+Because these flowers have inferior ovaries, measuring the nectar remaining in the flower after a visit requires destructively sampling the flower, precluding the scoring of pollen tubes in that flower. We were unable to spare extra flowers to check the remaining nectar in each plant species after visits from each hummingbird species. However, we can confirm the birds removed at least some nectar based on recorded video of visits in which one can see the birds drinking. We have submitted video files to be included in an online supplement.
 
 ### 1.12 
 
@@ -177,93 +214,110 @@
 
 * [ ] Addressed in lines ...
 
-**Notes**
+**Response**
 
-* See notes on E.2
-
-* Maybe Kara's camera data can be of some use, here with regards to *H. tortuosa*. 
-
-* Pollen data from Betts et al. (2015).
-
-* Literature for other species 
+ This is an excellent comment and we agree that pollinator recognition would not be an effective pollinator filter if competitive exclusion limits visitation by hummingbird species with mismatched bill shapes. In a separate project, authors M.G. Betts, A.S. Hadley, and others collected visitation data for *H. tortuosa*, which appears to be largely visited by well-matched green hermit hummingbirds (*Phaethornis guy*). However, birds with mismatched bill shapes still compose ~10% of honest visits. Furthermore, the proportion of individual birds with mismatched bill shapes that carry *Heliconia* pollen is comparable to the proportion of individual birds with well matched bill shapes that carry *Heliconia* pollen (Betts et al. 2015). This is consistent with our hypothesis that pollinator recognition could act as a pollinator filter since exploitation barriers and competition for resources among hummingbird species may not perfectly sort pollinators according to morphology.
+ 
+ While literature on the pollination of the other *Heliconia* species is limited, we included some text on the potential for a pollinator recognition mechanism to filter pollinators for each plant species based on available data. 
 
 
 ## Reviewer 2
 
-2.1 
+### 2.1 
 
  > 79 - check this sentence, repeats the same statement
  
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-2.2
+### 2.2
 
  > 85 - I think it would be important to add ideas about purity of pollen loads pollinators carry - would you expect those to differ (i.e. precision in size matching, deposition on safe sites, depositing on different areas of the pollinators body…) - you cited Muchhala before, so this would tie in easily here
 
 * [ ] Addressed in lines ...
 
-2.3 
+We appreciate the importance of the purity of pollen loads and placement of pollen on pollinator bodies, but thought that introducing these ideas in the introduction interrupted the flow of the writing. We therefore chose to include some text on this critical component of pollination later in the manuscript.
+
+
+### 2.3 
 
  > 132f - as it is written now, it is hard to follow all the different experiments you have done; I suggest you break this long paragraph into smaller paragraphs and include details on sample sizes (species, how many individuals per species) in each paragraph; also, I saw that you have longer experimental procedures as supplement, but I didn't see them being cited in the text? Anyways, I would suggest you include some more details still in the main text so that the reader can more easily understand what experiments you conducted.
  
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-2.4 
+**Response**
+
+In response to this comment, we have rewritten the methods section in a way we hope will improve tranparency. The revised text includes references to a supplement with greater experimental detail, including photographs of the aviaries and hand-pollination techniques.
+
+### 2.4 
 
  > 138 - how did you standardize quantity? This may still differ, no matter whether the pollen came from the same donor. Also, there is no explanation of how you applied the pollen to the stigmas. Furthermore, you do not specify anywhere whether flowers were emasculated before? If not, how can you rule out that pollinators did not remove pollen grains when visiting?
 
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-2.5
+
+**Response**
+
+These are all good points and we included greater detail in the methods section in order to clarify them. First, we did not emasculate the flowers because, in prior experience, flower damage has proven detrimental to pollen tube development, even in flowers left open to free-ranging pollinators. Second, the reviewer is correct that we were unable to perfectly standardize the number of pollen grains at the stigmatic surface due to the small size of *Heliconia* pollen. Instead, the same experimenter (author D.G. Gannon) hand pollinated each flower using a 20x hand lens to ensure that an even layer of pollen was spread across the stigma. There is indeed variability in the number of grains adhered to the stigmatic surface across these trails, but we attempted to limit this variability as much as possible. 
+
+While we cannot rule out that hummingbirds removed pollen from the stigma (in fact we think this did occur and resulted in the reduced pollen tube numbers in *H. wagneriana* flowers that were visited by hummingbirds), we detail a number of reasons why we do not expect this to underly the increased number of pollen tubes in *H. tortuosa* and *H. rostrata* flowers visited by morphologically matched hummingbirds.
+
+### 2.5
 
  > 146 - could hummingbirds dislodge pollen grains from the stigmas when visiting?
  
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-2.6
+This is a fair question, and we do expect that some pollen may be dislodged by hummingbirds. In our experience, *H wagneriana* pollen dessicates quickly compared to the other species and often fails to adhere to the stigmatic surface. We therefore expect this could have had a greater effect on the results for *H. wagneriana* than the other species. However, because the flowers were not emasculated, we expect that pollen dislodged by hummingbirds would be replaced on the stigma by self pollen due to the lack of separation between anthers and stigma (Figure 1). We discuss these possibilities in lines ... (and in lines 285-295 of the original version of the manuscript).
+
+### 2.6
 
  > 150 - please include per species sample sizes
 
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-2.7
+We have taken care to add a table with species-by-treatment sample sizes to the manuscript.
+
+### 2.7
 
  > 159 - I do not fully see how this test really allows you to control for potential pollen-rearrangement by hummingbirds. The surface of a pipette tip is different from feathers (i.e. even more electrostatically charged); is it possible to insert the pipette tip into the flower in the same angle/way a hummingbird would insert its bill?
  
-* [ ] Addressed in lines ...
+* [x] Addressed in lines ...
 
-**Thoughts**
+**Response**
 
-* Adam's "real bird" trials
+We thank the reviewer for giving this careful thought and consideration. Our point here was not to say that we "controlled" for the potential of pollen rearrangement by hummingbirds with these experiments. Instead, we aimed to justify why we think this mechanism is not very likely given that inserting a pipette tip into the flower, which we can do in a manner similar to a hummingbird, could also rearrange pollen grains on the stigma. We have edited the language in the new version of the manuscript in an attempt to make this clearer.
 
-2.8
+### 2.8
 
  > 253 - is there any previous experimental evidence whether the different hummingbird species differ in their pollination efficiency under natural conditions (i.e. visitation frequency and seed set)? This would be important information to add here in order to judge the relevance of your finding, i.e. whether increased pollen germination following the visit of a specific species may actually occur naturally.
  
 * [ ] Addressed in lines ...
 
-2.9
+ This is an excellent comment and something brought up by both the editor and another reviewer. Please see section 1.12 for our response to the same comment made by another reviewer.
+
+### 2.9
 
  > 273 - I think this is information that should come earlier, i.e. whether the different Heliconia species differ in flower size and may hence be expected to be adapted to a certain subgroup of hummingbirds
 
 * [ ] Addressed in lines ...
 
-2.10
+In the revised version of the manuscript, we have included more information on the natural history and morphology of the plant species we tested as well as our expectations with regards to pollinator recognition. We thank both reviewers and the editor for these suggestions.
+
+### 2.10
 
  > 308 - did you study H. tortuosa at the same locality in both studies? Could it be that it is adapted to different pollinator subsets in different populations?
 
 * [ ] Addressed in lines ...
 
-**Thoughts**
+**Response**
 
-* I really do not see how this is relevant considering that the results from bird trials are consistent.
+For both the 2015 paper and this manuscript, we studied *H. tortuosa* plants in the same region. While testing whether *H. tortuosa* is adapted to different pollinators in different geographic locations is beyond the scope of this manuscript, it is an intriguing idea. 
 
-2.11
+### 2.11
 
  > Fig 2 - it would be helpful to include the images of the flowers here as well, so that the reader can judge him/herself whether bill shape and flower shape relate…
 
-* [ ] Addressed in lines ...
+* [x] Addressed in Figure 1
 
-**Thoughts**
+We thank reviewer 2 for this excellent suggestion. We added a panel to Figure 1 (Figure 2 in the original version) so the reader can compare bill and flower shapes across species.
 
-* A side panel with flower and bill shapes...
