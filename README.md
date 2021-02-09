@@ -11,7 +11,7 @@ With aviary experiments that standardized pollen quality and minimized variation
 
 * RMarkdown documents with annotated analysis code can be found in the [Analyses](https://github.com/Dusty-Gannon/PR-in-Heliconia/tree/main/Analyses) folder. The results from the manuscript should be fully reproducible. 
 
-* A detailed description of the experimental, laboratory, and statistical methods can be found in the [supplementary methods](https://github.com/Dusty-Gannon/PR-in-Heliconia/blob/main/MS_files/Gannon_et_al_Appendix_S1.pdf) and in the [draft manuscript](https://github.com/Dusty-Gannon/PR-in-Heliconia/blob/main/MS_files/Gannon_et_al_AmNat2.docx).
+* A detailed description of the experimental, laboratory, and statistical methods can be found in the [supplementary methods](https://github.com/Dusty-Gannon/PR-in-Heliconia/blob/main/MS_files/Gannon_et_al_Appendix_S1.pdf) and in the [draft manuscript](https://github.com/Dusty-Gannon/PR-in-Heliconia/tree/main/MS_files).
 
 
 
