@@ -12,6 +12,7 @@ header-includes:
         \fancyhead[R]{Gannon et al. Supplemental methods}
         \fancyfoot[C]{S\thepage}
         \usepackage{graphicx}
+        \usepackage[left]{lineno}
 bibliography: /Users/dusty/Documents/zotero_library.bib
 indent: true
 ---
@@ -21,7 +22,7 @@ knitr::opts_chunk$set(echo = FALSE)
 require(here)
 require(knitr)
 ```
-
+\linenumbers
 
 
 \section{Supplemental methods}
