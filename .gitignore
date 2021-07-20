@@ -9,4 +9,12 @@ MS_files/AmNat_review_initial_Gannon_et_al.docx
 *~$*.docx
 *.mp4
 *.DS_Store
-MS_files/Gannon_et_al_cover_letter.docx
+# figure files that are not finalized
+*.png
+
+
+# Correspondence with journals
+MS_files/Gannon_et_al_cover_letter*
+*response_to_reviewers*
+
+
