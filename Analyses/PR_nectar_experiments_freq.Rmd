@@ -1,0 +1,206 @@
+---
+title: "Testing for generality of pollinator recognition in *Heliconia* - Frequentist tests for mechanisms"
+author: "D. G. Gannon, A. S. Hadley, U. G. Kormann, F. A. Jones, and M. G. Betts"
+output:
+  github_document:
+    pandoc_args: --webtex
+header-includes:
+  \usepackage{setspace}
+  \onehalfspacing
+  \usepackage{bm}
+bibliography: /Users/dusty/Documents/zotero_library.bib
+---
+
+
+### R packages
+
+```{r knit setup, echo=TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+  require(tidyverse)
+  require(here)
+  require(lme4)
+  require(gridExtra)
+
+```
+
+
+### Load and prepare data
+
+```{r load data}
+
+# read in data
+  nectar <- read_csv(file = here("Data", "nectar_experiments.csv"))
+
+# remove hirsuta experiments (not enough)
+  nectar <- nectar[-which(nectar$Species == "H.hirsuta"), ]
+  
+# remove cases in which liquid removed was not likely to be nectar
+  nectar$Brix2 <- nectar$Brix
+  nectar$Brix2[which(nectar$Brix2 == ">32")] <- "32" # replace entries of >32 with 32
+  nectar <- nectar[-which(nectar$Brix2 < 14.1),]
+  
+  nectar$Nectar2 <- nectar$Nectar_Out
+  nectar$Nectar2[which(is.na(nectar$Nectar2))] <- 0
+  nectar <- nectar[-which(nectar$Nectar2 > 30 & nectar$Species!="H.rostrata"), ]
+
+# create treatments for whether we pollinated before or after
+  nectar$Treatment[which(nectar$Pollen_added_after_visit == 1)] <- "NEHP"
+  
+#create factors for species and treatment
+  nectar$f.species <- factor(nectar$Species)
+  nectar$f.trt <- factor(nectar$Treatment, levels = c("HP", "PM", "HPNE", "NEHP"))
+  nectar$f.plant <- as.factor(nectar$Plant)
+  
+  
+```
+
+## Summary
+
+  We analyzed pollen tube data from nectar extraction experiments in a similar way to how we analyzed the data from the aviary experiments (see [aviary analysis]() for more details). In the data processing stage, we removed observations from experiments in which our nectar removal experiments were likely unsuccessful. We deemed experiments likely to be unsuccessful if the liquid removed was a large volume of dilute liquid. Based on previous experiments in which we attempted to remove nectar, then destructively sampled flowers to check the remainder, large volumes of dilute liquid usually indicated that we perforated the perianth with the pipette tip and took up water from the bract. Furthermore, in an independent dataset, the minimum Brix\% measured was 14.1\% (K.G. Leimburger *unpublished data*), and the volume of nectar found in a flower was rarely greater than 60 $\mu$L for *H. rostrata* and 30 for *H. tortuosa* and *H. wagneriana*. We therefore removed observations for which the volume was greater than these thresholds and/or the Brix\% was below 14.1 before fitting the model.
+  
+  
+\subsection{Model}
+  
+  We fit an identical model to these data as the model described in the analysis of the [aviary experiments](https://github.com/Dusty-Gannon/PR-in-Heliconia/blob/main/Analyses/PR_aviaries.md). We refer the reader to the markdown document found [here](https://github.com/Dusty-Gannon/PR-in-Heliconia/blob/main/Analyses/PR_aviaries.md) for the model definition.  
+  
+## Fitting the model
+
+```{r}
+
+  fit <- glmer(
+    Tube_Count ~ f.trt*f.species + (1|f.species:f.plant),
+    data = nectar,
+    control = glmerControl(optimizer = "bobyqa"),
+    family = "poisson"
+  )
+
+```
+
+## Bootstrap the predicted means
+
+```{r}
+# function to get predicted means from model
+   pred_means <- function(mod){
+     exp(X%*%mod@beta)
+   }
+
+# create new X
+  df_new <- data.frame(
+    species = rep(unique(nectar$f.species), each=length(unique(nectar$f.trt))),
+    trt = rep(unique(nectar$f.trt), length(unique(nectar$f.species)))
+  )
+  df_new <- df_new[order(df_new$species, df_new$trt), ]
+  X <- model.matrix(~trt*species, data = df_new)
+  
+# bootstrap the predictions
+  boot_preds <- bootMer(
+    fit,
+    pred_means,
+    nsim = 1000,
+    verbose = T,
+    PBargs = list(style=1)
+  )
+  
+# # save bootstrapped means for potential future use
+#   saveRDS(boot_preds, file = here(
+#     "Data",
+#     "boot_nectar_means.rds"
+#   ))
+  
+# combine with data frame for plotting
+  df_new <- df_new %>% mutate(
+    pred = as.double(boot_preds$t0),
+    se = apply(boot_preds$t, 2, sd),
+    low = apply(boot_preds$t, 2, quantile, probs=0.025),
+    high = apply(boot_preds$t, 2, quantile, probs=0.975),
+    trt2 = rep(
+      c(
+        "HP",
+        "HP + \n pipette",
+        "HP + \n nectar \n extraction",
+        "Nectar \n extraction + \n HP"
+      ), 3
+    ),
+    low.plot = pred - se,
+    high.plot = pred + se
+  )
+  
+  df_new$low.plot[df_new$low.plot < 0] <- 0
+  df_new$trt2 <- factor(df_new$trt2, levels = unique(df_new$trt2))
+  
+  
+```
+
+## Plotting results
+
+```{r}
+# Plot theme
+  mean_theme <- theme(panel.background = element_blank(),
+                      axis.line = element_line(colour = "darkgrey"),
+                      axis.text = element_text(size = 12, color="black"),
+                      plot.title = element_text(face = "italic",
+                                                size=16))
+
+# Sub plot for rostrata
+  ros <- ggplot(data = df_new[1:4,], aes(x=trt2, y=pred))+
+    geom_errorbar(
+      aes(ymin=low.plot, ymax=high.plot),
+      width=0
+    )+
+    geom_point(size=3)+
+    mean_theme+
+    theme(axis.text.x = element_blank())+
+    ylim(c(0,2))+
+    ylab("")+
+    xlab("")+
+    ggtitle("H. rostrata")
+  
+# sub plot for tortuosa
+  tor <- ggplot(data = df_new[5:8,], aes(x=trt2, y=pred))+
+    geom_errorbar(
+      aes(ymin=low.plot, ymax=high.plot),
+      width=0
+    )+
+    geom_point(size=3)+
+    mean_theme+
+    theme(axis.text.x = element_blank())+
+    ylim(c(0,2))+
+    ylab("")+
+    xlab("")+
+    ggtitle("H. tortuosa")
+  
+# sub plot for wagneriana
+  wag <- ggplot(data = df_new[9:12,], aes(x=trt2, y=pred))+
+    geom_errorbar(
+      aes(ymin=low.plot, ymax=high.plot),
+      width=0
+    )+
+    geom_point(size=3)+
+    mean_theme+
+    ylim(c(0,2))+
+    ylab("")+
+    xlab("")+
+    ggtitle("H. wagneriana")
+  
+# combine subplots
+  png(filename = here(
+    "Figures",
+    "figure_3_means_freq.png"
+  ), width = 1500, height = 2700, units = "px", res = 300)
+  
+    grid.arrange(ros, tor, wag, ncol=1)
+  
+  dev.off()
+
+```
+
+
+
+
+
+
+
+
+
+
