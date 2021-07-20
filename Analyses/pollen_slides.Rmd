@@ -1,0 +1,98 @@
+---
+title: "Testing for generality of pollinator recognition in *Heliconia*: Analysis of pollen export"
+author: "D.G. Gannon, A.S. Hadley, U.G. Kormann, F.A. Jones, M.G. Betts"
+header-includes:
+  \usepackage{setspace}
+  \onehalfspacing
+bibliography: /Users/dusty/Documents/zotero_library.bib
+output:
+  github_document:
+    pandoc_args: --webtex
+---
+
+```{r setup}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+# Packages
+  require(tidyverse)
+  require(here)
+
+```
+
+## Load data
+
+```{r data}
+
+# aviary experiment data
+  av <- read_csv(file = here(
+    "Data",
+    "aviaries_data.csv"
+  ))
+
+# Load pollen slides data
+  pol <- read_csv(file = here(
+    "Data",
+    "pollen_slides.csv"
+  ))
+  
+# pollen counter included blank rows
+  pol <- pol[complete.cases(pol), ]
+  
+# merge the two datasets
+  
+  pol_all <- merge(
+    pol,
+    av
+  )
+  
+# now add back data from failed RNAseq experiments
+## all these visits were by GREH
+  
+  pol_all_sub <- pol_all[,which(
+    names(pol_all) %in% c("Flower_ID", "Count", "Species", "Treatment")
+  )]
+  
+  rna <- pol[str_which(pol$Flower_ID, "R"), ]
+  rna <- rna %>% mutate(
+    Species = rep("H.tortuosa", nrow(rna)),
+    Treatment = rep("GREH", nrow(rna))
+  )
+  
+  pol_all_sub <- rbind(pol_all_sub, rna)
+
+
+```
+
+
+## Summarize data
+
+```{r}
+
+# summarize for tortuosa
+  group_by(pol_all_sub, Species, Treatment) %>%
+    summarise(
+      mean_count = mean(Count),
+      sd_cound = sd(Count),
+      n=n()
+    )
+
+# Just out of curiosity
+
+  heto_pol <- subset(pol_all_sub, Species=="H.tortuosa")
+  
+  t.test(
+    x=heto_pol$Count[heto_pol$Treatment=="RTAH"],
+    y=heto_pol$Count[heto_pol$Treatment=="GREH"]
+  )
+
+```
+
+
+
+
+
+
+
+
+
