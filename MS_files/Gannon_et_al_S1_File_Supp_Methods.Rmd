@@ -110,12 +110,6 @@ $$
 $$
 where ${\bf X}$ is a matrix of indicator variables indicating the species and treatment and ${\bf Z}$ is a matrix of indicator variables indicating the plant individual for the $i^\text{th}$ observation, $i=1,...,n$.  
 
-\section{Alternative mechanisms of recognition}
-
-We have considered a number of alternative hypotheses regarding the mechanism of recognition during our time studying *Heliconia* plants. Aside from differential nectar removal by different floral visitors, these include sonic cues provided by the beating of a hummingbird's wings (similar to what @veits2019 found with nectar production in *Oenothera drummondii* plants), mechanical stimuli that cannot be reproduced using a pipette tip [@braam2005], electrostatic interactions between pollen and negatively charged feathers of hummingbirds [@badger2015], and a reduction in self-pollen interference after a morphologically matched hummingbird removes pollen. Future experiments that test all of these alternative mechanisms are warranted.
-
-Currently, we have some evidence to support the hypothesis that pollen removal by morphologically matched hummingbirds could reduce self-pollen interference. For a small number of single aviary visits, we collected pollen from birds' heads and bills following the visit. Green Hermits removed 1,221.8 pollen grains from the flowers of *H. tortuosa* plants on average ($n=10$ visits, $s_x=695.67$ grains, where $s_x$ denotes the sample standard deviation) and Rufous-tails removed 202 grains on average ($n=3$ visits, $s_x=163.37$ grains). This suggests that morphologically matched hummingbirds could reduce self-pollen interference at the stigmatic surface to a greater degree than mismatched pollinators would. Furthermore, the result that hand-pollinating after manual nectar removal produced the fewest numbers of pollen tubes per style of any treatments (Fig 3, main text) supports that reducing pollen interference at the stigmatic surface could promote pollen germination and tube growth. However, prior experiments with a hummingbird cadaver, which should remove an equivalent amount of pollen from the flower as a live bird would, did not stimulate pollen tube growth. Thus, this hypothesis requires further investigation.
-
 
 \section{References}
 
